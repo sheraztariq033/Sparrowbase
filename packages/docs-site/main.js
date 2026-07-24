@@ -1,8 +1,5 @@
-// ═══════════════════════════════════════════
-// SparrowBase Landing Page — Interactive Logic
-// ═══════════════════════════════════════════
+let selectedAppType = 'saas'; // saas | social | ecommerce | ai
 
-// ── App Type Config ──
 const APP_TYPES = {
   saas:      { name: 'SaaS Dashboard',     reqPerUser: 5,  color: '#3b82f6' },
   ecommerce: { name: 'E-Commerce / Blog',  reqPerUser: 10, color: '#06b6d4' },
@@ -60,102 +57,126 @@ function updateCalculator() {
 
   const dau = parseInt(slider.value, 10);
   const config = APP_TYPES[currentAppType] || APP_TYPES.saas;
+  
+  // Scale variables
+  const mau = dau * 3; // Est. Monthly Active Users
   const dailyReqs = dau * config.reqPerUser;
   const monthlyReqs = dailyReqs * 30;
 
-  // Estimate ~0.5KB average response → bandwidth in GB
-  const monthlyBandwidthGB = (monthlyReqs * 0.5) / (1024 * 1024); // 0.5KB per req
+  // DB queries: 10 reads, 2 writes per session/request average
+  const monthlyReads = monthlyReqs * 10;
+  const monthlyWrites = monthlyReqs * 2;
+
+  // Storage: 2MB user db footprint + 20MB file uploads (avatars/PDFs) for 10% of active users
+  const dbStorageGB = Math.max(0.1, (mau * 2) / 1024);
+  const fileStorageGB = Math.max(0.5, (mau * 0.1 * 20) / 1024);
+  
+  // Bandwidth: avg response payload is 15KB + file downloads (5% of requests fetch a 3MB asset)
+  const bandwidthGB = ((monthlyReqs * 15) / (1024 * 1024)) + (monthlyReqs * 0.05 * 3) / 1024;
 
   // Update DAU display
   const dauDisplay = document.getElementById('dauDisplay');
   if (dauDisplay) {
-    dauDisplay.textContent = `${dau.toLocaleString()} Daily Active Users → ${dailyReqs.toLocaleString()} req/day (${(monthlyReqs / 1e6).toFixed(1)}M/month)`;
+    dauDisplay.textContent = `${dau.toLocaleString()} DAU (${mau.toLocaleString()} MAU) → ${dailyReqs.toLocaleString()} req/day (${(monthlyReqs / 1e6).toFixed(1)}M/mo)`;
   }
 
   const costEl = document.getElementById('calcCostResult');
   const breakdownEl = document.getElementById('calcBreakdown');
 
-  // ── SparrowBase (Cloudflare Workers) Pricing ──
-  // Free: 100,000 req/day (3M/month)
-  // Paid: $5/mo base → includes 10M req/month → then $0.30 per million additional
+  // ── SparrowBase (Cloudflare Edge) Cost ──
+  // Workers Paid is $5/mo. Includes 10M requests. Overage: $0.30/M.
+  // D1 DB reads: Paid includes 25M/day (750M/mo), then $0.001/M overage.
+  // D1 DB writes: Paid includes 50K/day (1.5M/mo), then $1.00/M overage.
+  // D1 DB storage: $0.75/GB after 5GB.
+  // R2 storage: 10GB free, then $0.015/GB. Egress is always $0.
+  // Better-Auth (self-hosted): $0/mo.
   let sparrowCost = 0;
-  if (dailyReqs <= 100_000) {
+  if (dailyReqs <= 100_000 && dbStorageGB <= 5 && fileStorageGB <= 10) {
     sparrowCost = 0;
-    if (costEl) {
-      costEl.textContent = '$0.00 / month';
-      costEl.className = 'calc-result free';
-    }
-    if (breakdownEl) {
-      breakdownEl.innerHTML = `
-        <strong>100% Free Tier</strong> — No credit card required.<br>
-        Your ${config.name} at ${dau.toLocaleString()} DAU uses ${dailyReqs.toLocaleString()} of 100,000 daily requests 
-        (${Math.round(dailyReqs / 1000)}% utilization). 
-        Plus 5M D1 reads/day, 10GB R2 storage, and $0 bandwidth egress.
-      `;
-    }
   } else {
     const baseCost = 5.00;
     const extraMillions = Math.max(0, (monthlyReqs - 10_000_000) / 1_000_000);
-    sparrowCost = baseCost + (extraMillions * 0.30);
-
-    if (costEl) {
-      costEl.textContent = `$${sparrowCost.toFixed(2)} / month`;
-      costEl.className = 'calc-result paid';
-    }
-    if (breakdownEl) {
-      breakdownEl.innerHTML = `
-        <strong>Workers Paid Tier</strong> — $5/mo base includes 10M requests/month.<br>
-        Your ${config.name} at ${dau.toLocaleString()} DAU generates ${(monthlyReqs / 1e6).toFixed(1)}M monthly requests.
-        ${extraMillions > 0 ? `Overage: ${extraMillions.toFixed(1)}M × $0.30 = $${(extraMillions * 0.30).toFixed(2)}` : 'No overage charges.'} 
-        All bandwidth egress is $0.
-      `;
-    }
+    const computeOverage = extraMillions * 0.30;
+    
+    const dbReadsOverage = Math.max(0, (monthlyReads - 750_000_000) / 1_000_000) * 0.001;
+    const dbWritesOverage = Math.max(0, (monthlyWrites - 1_500_000) / 1_000_000) * 1.00;
+    const dbStorageOverage = Math.max(0, dbStorageGB - 5) * 0.75;
+    
+    const fileStorageOverage = Math.max(0, fileStorageGB - 10) * 0.015;
+    
+    sparrowCost = baseCost + computeOverage + dbReadsOverage + dbWritesOverage + dbStorageOverage + fileStorageOverage;
   }
 
-  // ── Competitor Cost Calculations (official pricing) ──
+  if (costEl) {
+    costEl.textContent = sparrowCost === 0 ? '$0.00 / month' : `$${sparrowCost.toFixed(2)} / month`;
+    costEl.className = sparrowCost === 0 ? 'calc-result free' : 'calc-result paid';
+  }
 
-  // Vercel Pro: $20/mo base. 1M serverless function invocations included.
-  // Then $0.60 per additional million. Bandwidth: 100GB included, then $0.15/GB.
-  // Let's assume average request payload is 10KB.
-  const bandwidthGB = (monthlyReqs * 10) / (1024 * 1024); // 10KB average payload
+  if (breakdownEl) {
+    breakdownEl.innerHTML = sparrowCost === 0
+      ? `<strong>100% Free Tier</strong> — Uses ${dailyReqs.toLocaleString()} of 100k free daily requests. Storage (${fileStorageGB.toFixed(1)}GB R2, ${dbStorageGB.toFixed(1)}GB D1) is within limits.`
+      : `<strong>Edge Platform Pricing</strong> — $5 base includes 10M requests. Overage: compute ($${(Math.max(0, (monthlyReqs - 10_000_000)/1_000_000)*0.3).toFixed(2)}), database writes ($${(Math.max(0, (monthlyWrites - 1_500_000)/1_000_000)*1.0).toFixed(2)}), database storage ($${(Math.max(0, dbStorageGB - 5)*0.75).toFixed(2)}), R2 egress ($0.00).`;
+  }
+
+  // ── Competitor: Vercel (Next.js + Neon DB + Vercel Blob + Clerk Auth) ──
+  // Auth: Clerk Pro: $25/mo base for 10k MAUs. Overage: $0.02 per MAU.
+  const clerkCost = mau <= 10_000 ? 0 : 25 + (mau - 10_000) * 0.02;
+  // Compute: Vercel Pro is $20/mo (includes 1M function execution seconds). Overage average: $0.60/M.
   const vercelBase = 20;
-  const vercelExtraInvocations = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
-  const vercelExtraBW = Math.max(0, bandwidthGB - 100) * 0.15;
-  const vercelCost = monthlyReqs <= 100_000 ? 0 : vercelBase + vercelExtraInvocations + vercelExtraBW;
+  const vercelCompute = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
+  const vercelBandwidth = Math.max(0, bandwidthGB - 100) * 0.15;
+  // Neon Postgres DB: Free up to 0.5GB. Pro is $19/mo (includes 10GB), then $0.12/GB.
+  const neonCost = dbStorageGB <= 0.5 ? 0 : 19 + Math.max(0, dbStorageGB - 10) * 0.12;
+  // Vercel Blob: Free up to 250MB. Pro: $0.15/GB storage + $0.15/GB egress.
+  const vercelBlobCost = fileStorageGB <= 0.25 ? 0 : (fileStorageGB * 0.15) + (bandwidthGB * 0.15);
+  
+  const vercelCost = monthlyReqs <= 100_000 ? 0 : vercelBase + vercelCompute + vercelBandwidth + clerkCost + neonCost + vercelBlobCost;
 
-  // Supabase Pro: $25/mo base. 2M Edge Function invocations included (then $2.00/million).
-  // 250GB bandwidth included (then $0.09/GB).
+  // ── Competitor: Supabase (Supabase Functions + DB + Auth + Storage) ──
+  // Auth: Includes 50k MAUs. Overage: $0.00325 per MAU.
+  const supabaseAuth = Math.max(0, mau - 50_000) * 0.00325;
+  // Edge Functions: $25 Pro base includes 2M. Overage: $2.00 per million.
   const supabaseBase = 25;
-  const supabaseExtraInvocations = Math.max(0, (monthlyReqs - 2_000_000) / 1_000_000) * 2.00;
-  const supabaseExtraBW = Math.max(0, bandwidthGB - 250) * 0.09;
-  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseExtraInvocations + supabaseExtraBW;
+  const supabaseCompute = Math.max(0, (monthlyReqs - 2_000_000) / 1_000_000) * 2.00;
+  // Postgres: Pro includes 8GB. Overage: $0.125/GB.
+  const supabaseDb = Math.max(0, dbStorageGB - 8) * 0.125;
+  // Storage: Pro includes 100GB. Overage: $0.021/GB storage + $0.09/GB egress.
+  const supabaseStorage = Math.max(0, fileStorageGB - 100) * 0.021 + bandwidthGB * 0.09;
 
-  // Firebase Blaze: Cloud Functions: $0.40 per million. Bandwidth: $0.12/GB after 10GB.
-  // Firestore DB: $0.06 per 100k reads ($0.60/M) + $0.18 per 100k writes ($1.80/M).
-  // Assuming 1 read/write per request on average: ~$1.00/M database operations cost.
-  const firebaseInvocations = (monthlyReqs / 1_000_000) * 0.40;
-  const firebaseDbOps = (monthlyReqs / 1_000_000) * 1.00;
-  const firebaseExtraBW = Math.max(0, bandwidthGB - 10) * 0.12;
-  const firebaseCost = monthlyReqs <= 125_000 ? 0 : firebaseInvocations + firebaseDbOps + firebaseExtraBW;
+  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseAuth + supabaseCompute + supabaseDb + supabaseStorage;
 
-  // AWS RDS + Lambda:
-  // Requires: NAT Gateway ($32.40/mo fixed) + RDS PostgreSQL db.t4g.micro (~$15.00/mo) = $47.40 base.
-  // Plus Lambda ($0.20/M) + API Gateway HTTP ($1.00/M) = $1.20/M requests.
-  // Plus S3 storage egress: $0.09/GB.
+  // ── Competitor: Firebase Blaze (Cloud Functions + Firestore + Auth + Cloud Storage) ──
+  // Auth: Email/Password is free.
+  // Compute (Functions): $0.40 per million.
+  const firebaseCompute = (monthlyReqs / 1_000_000) * 0.40;
+  // Firestore DB: reads $0.60/M, writes $1.80/M. Storage: $0.18/GB.
+  const firebaseDb = ((monthlyReads / 1_000_000) * 0.60) + ((monthlyWrites / 1_000_000) * 1.80) + (dbStorageGB * 0.18);
+  // Storage: $0.026/GB storage + $0.12/GB egress bandwidth.
+  const firebaseStorage = (fileStorageGB * 0.026) + (bandwidthGB * 0.12);
+
+  const firebaseCost = monthlyReqs <= 100_000 ? 0 : firebaseCompute + firebaseDb + firebaseStorage;
+
+  // ── Competitor: AWS Serverless (RDS Postgres + NAT Gateway + API Gateway + Lambda + S3 + Cognito) ──
+  // RDS db.t4g.micro instance ($15.00/mo flat) + NAT Gateway ($32.40/mo fixed) = $47.40 base.
   const awsBase = 47.40;
-  const awsReqCost = (monthlyReqs / 1_000_000) * 1.20;
-  const awsExtraBW = bandwidthGB * 0.09;
-  const awsCost = monthlyReqs <= 100_000 ? 0 : awsBase + awsReqCost + awsExtraBW;
+  // Cognito Auth: Free for 50k MAUs, then $0.0055 per MAU.
+  const awsAuth = Math.max(0, mau - 50_000) * 0.0055;
+  // Lambda ($0.20/M) + API Gateway HTTP ($1.00/M) = $1.20/M requests.
+  const awsCompute = (monthlyReqs / 1_000_000) * 1.20;
+  // RDS Storage ($0.115/GB) + S3 Storage ($0.023/GB) + S3 Egress ($0.09/GB)
+  const awsStorage = (dbStorageGB * 0.115) + (fileStorageGB * 0.023) + (bandwidthGB * 0.09);
+
+  const awsCost = monthlyReqs <= 100_000 ? 0 : awsBase + awsAuth + awsCompute + awsStorage;
 
   // ── Render Competitor Grid ──
   const competitorGrid = document.getElementById('competitorCosts');
   if (competitorGrid) {
     const competitors = [
-      { name: '🦜 SparrowBase',   cost: sparrowCost,  color: '#10b981', note: 'Cloudflare Workers Edge' },
-      { name: '▲ Vercel Pro',      cost: vercelCost,   color: '#f59e0b', note: '$20/mo base + $0.60/M + $0.15/GB' },
-      { name: '⚡ Supabase Pro',   cost: supabaseCost, color: '#f59e0b', note: '$25/mo base + $2.00/M + $0.09/GB' },
-      { name: '🔥 Firebase Blaze', cost: firebaseCost, color: '#f43f5e', note: '$0.40/M func + database + $0.12/GB' },
-      { name: '☁️ AWS (RDS+NAT)',  cost: awsCost,      color: '#f43f5e', note: '$47.40/mo NAT/RDS + $1.20/M + egress' },
+      { name: '🦜 SparrowBase',   cost: sparrowCost,  color: '#10b981', note: 'Cloudflare Edge (Free R2 egress)' },
+      { name: '▲ Vercel + Clerk', cost: vercelCost,   color: '#f59e0b', note: 'Vercel Pro + Neon DB + Clerk Auth' },
+      { name: '⚡ Supabase Pro',   cost: supabaseCost, color: '#f59e0b', note: 'Supabase Pro + Storage egress' },
+      { name: '🔥 Firebase Blaze', cost: firebaseCost, color: '#f43f5e', note: 'Functions + Firestore reads/writes' },
+      { name: '☁️ AWS (RDS+NAT)',  cost: awsCost,      color: '#f43f5e', note: 'Cognito + NAT Gateway + RDS DB' },
     ];
 
     competitorGrid.innerHTML = competitors.map(c => {
@@ -168,13 +189,12 @@ function updateCalculator() {
             ${c.cost === 0 ? '$0' : '$' + c.cost.toFixed(2)}
           </div>
           <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 4px;">${c.note}</div>
-          ${!isCheapest && savings > 0 ? `<div style="font-size: 0.72rem; color: var(--brand-rose); margin-top: 6px; font-weight: 600;">+$${savings.toFixed(2)} more than SparrowBase</div>` : ''}
+          ${!isCheapest && savings > 0 ? `<div style="font-size: 0.72rem; color: var(--brand-rose); margin-top: 6px; font-weight: 600;">+$${savings.toFixed(2)} / mo more</div>` : ''}
           ${isCheapest ? `<div style="font-size: 0.72rem; color: var(--brand-emerald); margin-top: 6px; font-weight: 600;">✓ Cheapest option</div>` : ''}
         </div>
       `;
     }).join('');
   }
-
 }
 
 // ── Navigation ──
@@ -186,6 +206,7 @@ function scrollToCode() {
   }
 }
 
+// ── Toggle Mobile Menu ──
 function toggleMobileMenu() {
   const nav = document.getElementById('navLinks');
   if (nav) nav.classList.toggle('mobile-open');
