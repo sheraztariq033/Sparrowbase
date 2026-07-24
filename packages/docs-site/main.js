@@ -115,39 +115,47 @@ function updateCalculator() {
   // ── Competitor Cost Calculations (official pricing) ──
 
   // Vercel Pro: $20/mo base. 1M serverless function invocations included.
-  // Then $0.60 per additional million. Bandwidth: 1TB included, then $0.15/GB.
+  // Then $0.60 per additional million. Bandwidth: 100GB included, then $0.15/GB.
+  // Let's assume average request payload is 10KB.
+  const bandwidthGB = (monthlyReqs * 10) / (1024 * 1024); // 10KB average payload
   const vercelBase = 20;
   const vercelExtraInvocations = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
-  const vercelExtraBW = Math.max(0, monthlyBandwidthGB - 1000) * 0.15;
+  const vercelExtraBW = Math.max(0, bandwidthGB - 100) * 0.15;
   const vercelCost = monthlyReqs <= 100_000 ? 0 : vercelBase + vercelExtraInvocations + vercelExtraBW;
 
-  // Supabase Pro: $25/mo base. 250GB bandwidth included, then $0.09/GB. DB: 8GB included.
+  // Supabase Pro: $25/mo base. 2M Edge Function invocations included (then $2.00/million).
+  // 250GB bandwidth included (then $0.09/GB).
   const supabaseBase = 25;
-  const supabaseExtraBW = Math.max(0, monthlyBandwidthGB - 250) * 0.09;
-  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseExtraBW;
+  const supabaseExtraInvocations = Math.max(0, (monthlyReqs - 2_000_000) / 1_000_000) * 2.00;
+  const supabaseExtraBW = Math.max(0, bandwidthGB - 250) * 0.09;
+  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseExtraInvocations + supabaseExtraBW;
 
-  // Firebase Blaze: $0.40 per million Cloud Function invocations. Bandwidth: $0.12/GB after 10GB.
+  // Firebase Blaze: Cloud Functions: $0.40 per million. Bandwidth: $0.12/GB after 10GB.
+  // Firestore DB: $0.06 per 100k reads ($0.60/M) + $0.18 per 100k writes ($1.80/M).
+  // Assuming 1 read/write per request on average: ~$1.00/M database operations cost.
   const firebaseInvocations = (monthlyReqs / 1_000_000) * 0.40;
-  const firebaseExtraBW = Math.max(0, monthlyBandwidthGB - 10) * 0.12;
-  const firebaseCost = monthlyReqs <= 125_000 ? 0 : firebaseInvocations + firebaseExtraBW;
+  const firebaseDbOps = (monthlyReqs / 1_000_000) * 1.00;
+  const firebaseExtraBW = Math.max(0, bandwidthGB - 10) * 0.12;
+  const firebaseCost = monthlyReqs <= 125_000 ? 0 : firebaseInvocations + firebaseDbOps + firebaseExtraBW;
 
-  // AWS Lambda: $0.20 per million requests + $0.0000166667 per GB-second (128MB, 200ms avg).
-  // Plus S3 bandwidth: $0.09/GB after 100GB.
-  const lambdaReqCost = (monthlyReqs / 1_000_000) * 0.20;
-  const lambdaComputeGBs = monthlyReqs * 0.128 * 0.2; // 128MB × 200ms
-  const lambdaCompute = lambdaComputeGBs * 0.0000166667;
-  const lambdaExtraBW = Math.max(0, monthlyBandwidthGB - 100) * 0.09;
-  const awsCost = monthlyReqs <= 1_000_000 ? 0 : lambdaReqCost + lambdaCompute + lambdaExtraBW;
+  // AWS RDS + Lambda:
+  // Requires: NAT Gateway ($32.40/mo fixed) + RDS PostgreSQL db.t4g.micro (~$15.00/mo) = $47.40 base.
+  // Plus Lambda ($0.20/M) + API Gateway HTTP ($1.00/M) = $1.20/M requests.
+  // Plus S3 storage egress: $0.09/GB.
+  const awsBase = 47.40;
+  const awsReqCost = (monthlyReqs / 1_000_000) * 1.20;
+  const awsExtraBW = bandwidthGB * 0.09;
+  const awsCost = monthlyReqs <= 100_000 ? 0 : awsBase + awsReqCost + awsExtraBW;
 
   // ── Render Competitor Grid ──
   const competitorGrid = document.getElementById('competitorCosts');
   if (competitorGrid) {
     const competitors = [
-      { name: '🦜 SparrowBase',   cost: sparrowCost,  color: '#10b981', note: 'Cloudflare Workers' },
-      { name: '▲ Vercel Pro',      cost: vercelCost,   color: '#f59e0b', note: '$20/mo base + $0.60/M functions' },
-      { name: '⚡ Supabase Pro',   cost: supabaseCost, color: '#f59e0b', note: '$25/mo base + $0.09/GB egress' },
-      { name: '🔥 Firebase Blaze', cost: firebaseCost, color: '#f43f5e', note: '$0.40/M invocations + $0.12/GB' },
-      { name: '☁️ AWS Lambda',     cost: awsCost,      color: '#f43f5e', note: '$0.20/M req + compute + $0.09/GB' },
+      { name: '🦜 SparrowBase',   cost: sparrowCost,  color: '#10b981', note: 'Cloudflare Workers Edge' },
+      { name: '▲ Vercel Pro',      cost: vercelCost,   color: '#f59e0b', note: '$20/mo base + $0.60/M + $0.15/GB' },
+      { name: '⚡ Supabase Pro',   cost: supabaseCost, color: '#f59e0b', note: '$25/mo base + $2.00/M + $0.09/GB' },
+      { name: '🔥 Firebase Blaze', cost: firebaseCost, color: '#f43f5e', note: '$0.40/M func + database + $0.12/GB' },
+      { name: '☁️ AWS (RDS+NAT)',  cost: awsCost,      color: '#f43f5e', note: '$47.40/mo NAT/RDS + $1.20/M + egress' },
     ];
 
     competitorGrid.innerHTML = competitors.map(c => {
