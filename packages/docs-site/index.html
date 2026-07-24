@@ -24,10 +24,10 @@
       </a>
 
       <ul class="nav-menu">
-        <li><a href="#features">Features</a></li>
+        <li><a href="#ai-tools">AI Coding Tools</a></li>
+        <li><a href="#comparison">SparrowBase vs Competitors</a></li>
         <li><a href="#plain-english">Plain English Limits</a></li>
         <li><a href="#calculator">Cost Calculator</a></li>
-        <li><a href="#pricing-table">Official Cloudflare Pricing</a></li>
         <li><a href="javascript:void(0)" onclick="openDocsModal()">Developer Docs</a></li>
       </ul>
 
@@ -139,33 +139,136 @@ app.get('/api/users', async (c) => {
     </div>
   </section>
 
-  <!-- Features Grid -->
-  <section id="features" style="padding: 60px 0;">
+  <!-- Compatible AI Coding Tools Section -->
+  <section id="ai-tools" class="ai-tools-section">
     <div class="container">
       <div class="section-head">
-        <h2>Built for Production Reliability</h2>
-        <p>Everything needed to scale from an indie MVP to a million-user application.</p>
+        <h2>Compatible With All AI Coding Tools</h2>
+        <p>SparrowBase embeds <code>.sparrowbase/CLAUDE.md</code> and <code>.cursorrules</code> into your project so any AI assistant writes 100% accurate, error-free Cloudflare Workers code on the first try.</p>
       </div>
 
-      <div class="explain-grid">
-        <div class="explain-card">
-          <div class="explain-tag">Security</div>
-          <h3>Zero Token Custody</h3>
-          <p>You never send Cloudflare API keys to a 3rd party SaaS server. The BYOK CLI provisions everything directly inside your local environment.</p>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-icon">⚡</div>
+          <div class="tool-info">
+            <h4>Cursor IDE</h4>
+            <p>Reads <code>.cursorrules</code> automatically to generate Hono & D1 routes seamlessly.</p>
+          </div>
         </div>
 
-        <div class="explain-card">
-          <div class="explain-tag">Authentication</div>
-          <h3>Better-Auth + D1</h3>
-          <p>Web Crypto authentication running natively inside SQLite D1. Zero monthly user limits or third-party auth costs.</p>
+        <div class="tool-card">
+          <div class="tool-icon">🌊</div>
+          <div class="tool-info">
+            <h4>Windsurf</h4>
+            <p>Full cascade agent integration with zero hallucinated Node.js modules.</p>
+          </div>
         </div>
 
-        <div class="explain-card">
-          <div class="explain-tag">Payments</div>
-          <h3>Stripe Subscriptions</h3>
-          <p>Raw ArrayBuffer Webhook signature validation and subscription state machine syncing customer tiers automatically.</p>
+        <div class="tool-card">
+          <div class="tool-icon">▲</div>
+          <div class="tool-info">
+            <h4>v0 by Vercel</h4>
+            <p>Generates frontend code that connects directly to <code>@sparrowbase/client</code>.</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-icon">❤️</div>
+          <div class="tool-info">
+            <h4>Lovable.dev</h4>
+            <p>Build full-stack web applications with 1-click backend edge integration.</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-icon">⚡</div>
+          <div class="tool-info">
+            <h4>Bolt.new</h4>
+            <p>WebContainer in-browser execution with native SparrowBase edge schemas.</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-icon">🧠</div>
+          <div class="tool-info">
+            <h4>Claude Artifacts</h4>
+            <p>Reads <code>CLAUDE.md</code> constraints for flawless TypeScript Workers generation.</p>
+          </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Competitive Comparison Matrix Section -->
+  <section id="comparison" class="compare-section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Why Choose SparrowBase over Competitors?</h2>
+        <p>See how SparrowBase compares to Supabase, Vercel, Firebase, and AWS on pricing, bandwidth, and AI compatibility.</p>
+      </div>
+
+      <table class="compare-matrix-table">
+        <thead>
+          <tr>
+            <th>Feature / Dimension</th>
+            <th class="compare-highlight">🦜 SparrowBase</th>
+            <th>Supabase</th>
+            <th>Vercel</th>
+            <th>Firebase</th>
+            <th>AWS S3 / Lambda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Starter Free Tier</strong></td>
+            <td class="compare-highlight"><span class="check-yes">100k req/day ($0)</span></td>
+            <td>500MB DB (Pauses)</td>
+            <td>100GB Bandwidth</td>
+            <td>1GB DB Limit</td>
+            <td>12 Months Free Limit</td>
+          </tr>
+          <tr>
+            <td><strong>Bandwidth Egress Fees</strong></td>
+            <td class="compare-highlight"><span class="check-yes">$0.00 / GB (Always Free)</span></td>
+            <td>$0.09 / GB</td>
+            <td>$0.15 - $0.40 / GB</td>
+            <td>$0.12 / GB</td>
+            <td>$0.09 - $0.15 / GB</td>
+          </tr>
+          <tr>
+            <td><strong>Cold Start Latency</strong></td>
+            <td class="compare-highlight"><span class="check-yes">0ms (V8 Edge Isolates)</span></td>
+            <td><span class="check-partial">100ms - 500ms</span></td>
+            <td><span class="check-partial">200ms - 1500ms</span></td>
+            <td><span class="check-partial">300ms - 2000ms</span></td>
+            <td><span class="check-partial">200ms - 2000ms</span></td>
+          </tr>
+          <tr>
+            <td><strong>AI Vibe Rules Engine</strong></td>
+            <td class="compare-highlight"><span class="check-yes">Built-In (.sparrowbase)</span></td>
+            <td><span class="check-no">None</span></td>
+            <td><span class="check-no">None</span></td>
+            <td><span class="check-no">None</span></td>
+            <td><span class="check-no">None</span></td>
+          </tr>
+          <tr>
+            <td><strong>Token Custody / Security</strong></td>
+            <td class="compare-highlight"><span class="check-yes">100% BYOK Local-First</span></td>
+            <td>Hosted SaaS Custody</td>
+            <td>Hosted SaaS Custody</td>
+            <td>Hosted SaaS Custody</td>
+            <td>IAM Credentials</td>
+          </tr>
+          <tr>
+            <td><strong>Surprise Bill Protection</strong></td>
+            <td class="compare-highlight"><span class="check-yes">Hard Daily Caps ($0)</span></td>
+            <td><span class="check-no">Overage Billing</span></td>
+            <td><span class="check-no">Overage Billing</span></td>
+            <td><span class="check-no">Overage Billing</span></td>
+            <td><span class="check-no">Overage Billing</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -178,7 +281,6 @@ app.get('/api/users', async (c) => {
       </div>
 
       <div class="explain-grid">
-        <!-- Card 1 -->
         <div class="explain-card">
           <div class="explain-tag">SaaS Dashboard Workload</div>
           <h3>100,000 Req / Day</h3>
@@ -190,7 +292,6 @@ app.get('/api/users', async (c) => {
           </div>
         </div>
 
-        <!-- Card 2 -->
         <div class="explain-card">
           <div class="explain-tag">Social App Workload</div>
           <h3>100,000 Req / Day</h3>
@@ -202,7 +303,6 @@ app.get('/api/users', async (c) => {
           </div>
         </div>
 
-        <!-- Card 3 -->
         <div class="explain-card">
           <div class="explain-tag">E-Commerce / Blog</div>
           <h3>100,000 Req / Day</h3>
@@ -314,7 +414,7 @@ npx wrangler d1 create sparrowbase-db
 npx wrangler r2 bucket create sparrowbase-uploads</pre>
 
       <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">3. AI Vibe Coding Integration</h3>
-      <p style="color: var(--text-muted); margin-bottom: 12px;">Open the generated folder in <strong>Cursor</strong>, <strong>Windsurf</strong>, or <strong>v0</strong>. The embedded <code>.sparrowbase/CLAUDE.md</code> rulepack automatically enforces Cloudflare Workers edge compatibility.</p>
+      <p style="color: var(--text-muted); margin-bottom: 12px;">Open the generated folder in <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>v0</strong>, or <strong>Claude</strong>. The embedded <code>.sparrowbase/CLAUDE.md</code> rulepack automatically enforces Cloudflare Workers edge compatibility.</p>
 
       <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">4. Deploying to Cloudflare Pages & Workers</h3>
       <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);"># Deploy Frontend to Cloudflare Pages
