@@ -25,14 +25,15 @@
 
       <ul class="nav-menu">
         <li><a href="#features">Features</a></li>
-        <li><a href="#pricing">Plain English Limits</a></li>
+        <li><a href="#plain-english">Plain English Limits</a></li>
         <li><a href="#calculator">Cost Calculator</a></li>
-        <li><a href="#docs">Developer Docs</a></li>
+        <li><a href="#pricing-table">Official Cloudflare Pricing</a></li>
+        <li><a href="javascript:void(0)" onclick="openDocsModal()">Developer Docs</a></li>
       </ul>
 
       <div class="nav-cta">
         <a href="https://github.com/sparrowbase/sparrowbase" target="_blank" class="btn btn-glass">GitHub</a>
-        <a href="#get-started" class="btn btn-primary" onclick="selectTab('tab-init'); document.getElementById('code-container').scrollIntoView();">Get Started</a>
+        <button class="btn btn-primary" onclick="selectTab('tab-init'); document.getElementById('code-container').scrollIntoView();">Get Started</button>
       </div>
     </div>
   </header>
@@ -59,7 +60,7 @@
         <button class="btn btn-primary" onclick="copyActiveCode()">
           <span>npx sparrowbase init</span>
         </button>
-        <a href="#pricing" class="btn btn-glass">Explore $0 Free Tier</a>
+        <button class="btn btn-glass" onclick="openDocsModal()">Open Developer Docs</button>
       </div>
 
       <!-- Interactive Code Snippet Component -->
@@ -138,51 +139,150 @@ app.get('/api/users', async (c) => {
     </div>
   </section>
 
-  <!-- Plain English Quota Breakdown Section -->
-  <section id="pricing" class="explain-section">
+  <!-- Features Grid -->
+  <section id="features" style="padding: 60px 0;">
     <div class="container">
       <div class="section-head">
-        <h2>What Does "$0 Free Tier" Actually Mean?</h2>
-        <p>No vague jargon. Here is exactly what Cloudflare's free limits mean for your real-world app in simple plain English.</p>
+        <h2>Built for Production Reliability</h2>
+        <p>Everything needed to scale from an indie MVP to a million-user application.</p>
+      </div>
+
+      <div class="explain-grid">
+        <div class="explain-card">
+          <div class="explain-tag">Security</div>
+          <h3>Zero Token Custody</h3>
+          <p>You never send Cloudflare API keys to a 3rd party SaaS server. The BYOK CLI provisions everything directly inside your local environment.</p>
+        </div>
+
+        <div class="explain-card">
+          <div class="explain-tag">Authentication</div>
+          <h3>Better-Auth + D1</h3>
+          <p>Web Crypto authentication running natively inside SQLite D1. Zero monthly user limits or third-party auth costs.</p>
+        </div>
+
+        <div class="explain-card">
+          <div class="explain-tag">Payments</div>
+          <h3>Stripe Subscriptions</h3>
+          <p>Raw ArrayBuffer Webhook signature validation and subscription state machine syncing customer tiers automatically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plain English Quota Breakdown Section -->
+  <section id="plain-english" class="explain-section">
+    <div class="container">
+      <div class="section-head">
+        <h2>What Do Cloudflare's Limits Mean for Your App?</h2>
+        <p>We translated raw infrastructure metrics into real-world daily active user (DAU) workloads.</p>
       </div>
 
       <div class="explain-grid">
         <!-- Card 1 -->
         <div class="explain-card">
-          <div class="explain-tag">Serverless Compute</div>
-          <h3>100,000 Requests / Day</h3>
-          <div class="big-stat">~20,000+ Active Users</div>
-          <p>This means your backend can handle <strong>100,000 API calls every single day for $0/mo</strong>. That is enough to support 20,000 to 50,000 active daily visitors without paying a single cent.</p>
+          <div class="explain-tag">SaaS Dashboard Workload</div>
+          <h3>100,000 Req / Day</h3>
+          <div class="big-stat">~20,000 DAU</div>
+          <p>If your users average 5 API requests per session (e.g. login, load dashboard, update settings), your app can support <strong>20,000 daily active users for $0/mo</strong>.</p>
+          <div class="usecase-badges">
+            <span class="usecase-badge">B2B SaaS</span>
+            <span class="usecase-badge">Admin Tools</span>
+          </div>
         </div>
 
         <!-- Card 2 -->
         <div class="explain-card">
-          <div class="explain-tag">Edge Database (D1)</div>
-          <h3>5 Million Reads / Day</h3>
-          <div class="big-stat">150M Queries / Mo</div>
-          <p>Your database can fetch user profiles, posts, or items over <strong>150 Million times per month for $0/mo</strong>. Zero cold starts, sub-1ms edge performance.</p>
+          <div class="explain-tag">Social App Workload</div>
+          <h3>100,000 Req / Day</h3>
+          <div class="big-stat">~4,000 DAU</div>
+          <p>Interactive social or chat apps generate ~25 requests per session (feed scroll, comments, likes). You can support <strong>4,000 active daily users for $0/mo</strong>.</p>
+          <div class="usecase-badges">
+            <span class="usecase-badge">Chat App</span>
+            <span class="usecase-badge">Social Feed</span>
+          </div>
         </div>
 
         <!-- Card 3 -->
         <div class="explain-card">
-          <div class="explain-tag">Object Storage (R2)</div>
-          <h3>10 GB Storage + $0 Egress</h3>
-          <div class="big-stat">20,000 HD Files</div>
-          <p>Store up to 10 Gigabytes of images, PDFs, or user avatars. Unlike AWS S3, Cloudflare charges <strong>$0 in bandwidth egress fees</strong>, so viral traffic will never surprise bill you.</p>
+          <div class="explain-tag">E-Commerce / Blog</div>
+          <h3>100,000 Req / Day</h3>
+          <div class="big-stat">~10,000 DAU</div>
+          <p>Browsing products or reading articles averages ~10 requests per visitor. You can serve <strong>10,000 active daily shoppers for $0/mo</strong>.</p>
+          <div class="usecase-badges">
+            <span class="usecase-badge">Storefront</span>
+            <span class="usecase-badge">Media Site</span>
+          </div>
         </div>
       </div>
 
       <!-- Interactive Calculator Component -->
       <div id="calculator" class="calc-card">
-        <h3 class="calc-title">Interactive Cost Estimator</h3>
-        <p style="color: var(--text-muted);">Slide to see how much your app will cost as active users grow:</p>
+        <h3 class="calc-title">Interactive Cost Calculator</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Select your application type and drag the daily active user slider:</p>
+
+        <!-- App Type Selector -->
+        <div class="app-type-selector">
+          <button class="app-type-btn active" onclick="selectAppType('saas')">SaaS Dashboard (5 req/user)</button>
+          <button class="app-type-btn" onclick="selectAppType('social')">Social / Chat App (25 req/user)</button>
+          <button class="app-type-btn" onclick="selectAppType('ecommerce')">E-Commerce / Blog (10 req/user)</button>
+          <button class="app-type-btn" onclick="selectAppType('ai')">AI RAG App (40 req/user)</button>
+        </div>
 
         <div class="calc-slider-box">
           <input type="range" id="userSlider" min="500" max="50000" step="500" value="5000" oninput="updateCalc()">
-          <div id="calcReqCount" style="margin-top: 12px; font-weight: 600; color: var(--cyan);">~75,000 req/day (5,000 active users)</div>
+          <div id="calcReqCount" style="margin-top: 12px; font-weight: 600; color: var(--cyan);">5,000 Daily Active Users</div>
         </div>
 
-        <div class="calc-result" id="calcCost">$0.00 / month (100% Covered by Free Tier)</div>
+        <div class="calc-result" id="calcCost">$0.00 / month (100% Free)</div>
+        <div class="calc-details" id="calcDetails">Fits 100% within Cloudflare Free Tier!</div>
+      </div>
+
+      <!-- Official Cloudflare Pricing Comparison Table -->
+      <div id="pricing-table" class="pricing-table-section">
+        <h2 style="text-align: center; font-size: 2rem; font-weight: 800;">Official Cloudflare Pricing Match</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-top: 8px;">Direct comparison between Free Tier and Workers Paid Tier.</p>
+
+        <table class="pricing-table">
+          <thead>
+            <tr>
+              <th>Cloudflare Resource</th>
+              <th>Free Tier Cap ($0/mo)</th>
+              <th>Workers Paid Tier ($5/mo Base)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Workers Serverless Compute</strong></td>
+              <td>100,000 requests / day (3M / mo)</td>
+              <td>10 Million req / mo included (then $0.30/M)</td>
+            </tr>
+            <tr>
+              <td><strong>D1 SQLite Database Reads</strong></td>
+              <td>5 Million reads / day</td>
+              <td>25 Million reads / day included (then $0.001/M)</td>
+            </tr>
+            <tr>
+              <td><strong>D1 SQLite Database Writes</strong></td>
+              <td>100,000 writes / day</td>
+              <td>50,000 writes / day included (then $1.00/M)</td>
+            </tr>
+            <tr>
+              <td><strong>R2 Object Storage</strong></td>
+              <td>10 GB Storage</td>
+              <td>$0.015 / GB-month storage</td>
+            </tr>
+            <tr>
+              <td><strong>R2 Bandwidth Egress Fees</strong></td>
+              <td><strong>$0.00 / GB (Always Free)</strong></td>
+              <td><strong>$0.00 / GB (Always Free)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>KV Key-Value Cache Reads</strong></td>
+              <td>100,000 reads / day</td>
+              <td>$0.50 / Million reads</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Live Edge Status Component -->
@@ -196,6 +296,38 @@ app.get('/api/users', async (c) => {
 
     </div>
   </section>
+
+  <!-- Interactive Developer Docs Drawer / Modal -->
+  <div id="docsModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeDocsModal()">✕</button>
+      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 16px; color: var(--cyan);">SparrowBase Developer Documentation</h2>
+      
+      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">1. Initializing a Project</h3>
+      <p style="color: var(--text-muted); margin-bottom: 12px;">Run the CLI scaffolder to set up Hono, D1, Better-Auth, and AI rules:</p>
+      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);">npx sparrowbase init my-app</pre>
+
+      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">2. Setting Up Cloudflare Resources ($0 Free Tier)</h3>
+      <p style="color: var(--text-muted); margin-bottom: 12px;">Authenticate once with Wrangler and provision D1 & R2:</p>
+      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);">npx wrangler login
+npx wrangler d1 create sparrowbase-db
+npx wrangler r2 bucket create sparrowbase-uploads</pre>
+
+      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">3. AI Vibe Coding Integration</h3>
+      <p style="color: var(--text-muted); margin-bottom: 12px;">Open the generated folder in <strong>Cursor</strong>, <strong>Windsurf</strong>, or <strong>v0</strong>. The embedded <code>.sparrowbase/CLAUDE.md</code> rulepack automatically enforces Cloudflare Workers edge compatibility.</p>
+
+      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">4. Deploying to Cloudflare Pages & Workers</h3>
+      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);"># Deploy Frontend to Cloudflare Pages
+npx wrangler pages deploy packages/docs-site --project-name=sparrowbase
+
+# Deploy Edge Backend Worker
+npx wrangler deploy</pre>
+
+      <div style="margin-top: 32px; text-align: right;">
+        <button class="btn btn-primary" onclick="closeDocsModal()">Close Documentation</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Element -->
   <div id="toast" class="toast">Copied to clipboard!</div>
