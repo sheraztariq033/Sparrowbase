@@ -1,0 +1,18 @@
+# Node dependencies
+node_modules/
+
+# Build outputs
+dist/
+.wrangler/
+.mf/
+
+# Environment files & Secrets
+.env
+.env.local
+.dev.vars
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

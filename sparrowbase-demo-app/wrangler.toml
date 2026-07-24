@@ -1,0 +1,39 @@
+name = "sparrowbase-demo-app"
+main = "src/index.ts"
+compatibility_date = "2024-04-05"
+compatibility_flags = ["nodejs_compat"]
+
+# Enable Cloudflare Default Temporary Domain (*.workers.dev)
+workers_dev = true
+
+# Optional Custom Domain Configuration (Uncomment when custom domain is connected)
+# routes = [
+#   { pattern = "demo-api.sparrowbase.dev", custom_domain = true }
+# ]
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "sparrowbase-demo-db"
+database_id = "local-sparrowbase-demo-db-id"
+migrations_dir = "drizzle"
+
+# R2 Object Storage Bucket Binding
+[[r2_buckets]]
+binding = "UPLOADS_BUCKET"
+bucket_name = "sparrowbase-demo-uploads"
+
+# KV Throttling & Session Cache
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "sparrowbase-demo-rate-limit-kv-id"
+
+# Vectorize Vector Search Index Binding
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "sparrowbase-demo-vector-index"
+
+# Environment Variables Configuration
+[vars]
+ENVIRONMENT = "development"
+BETTER_AUTH_URL = "http://localhost:8787"

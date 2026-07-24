@@ -1,0 +1,16 @@
+{
+  "name": "sparrowbase-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:template": "npm --prefix packages/template-core run dev",
+    "dev:docs": "npm --prefix packages/docs-site run dev",
+    "build": "npm --prefix packages/cli run build && npm --prefix packages/template-core run build && npm --prefix packages/client run build",
+    "test": "npm --prefix packages/template-core run test && npm --prefix packages/client run test"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

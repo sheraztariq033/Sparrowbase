@@ -1,0 +1,7 @@
+# SparrowBase Cursor Rules (sparrowbase.dev)
+
+- Always use Hono (`import { Hono } from 'hono'`) instead of Express or standard Request handlers.
+- Access database bindings via `c.env.DB` and wrap with `getDb(c.env.DB)`.
+- Use Drizzle ORM (`drizzle-orm/sqlite-core`) for all SQL operations. Never write raw string concatenation queries.
+- Do not import Node native modules (`fs`, `path`, `crypto`, `child_process`). Use Web APIs (`fetch`, `crypto.subtle`, `Headers`, `Request`, `Response`).
+- Use Zod (`zod`) for API body/query validation.
