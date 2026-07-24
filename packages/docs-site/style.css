@@ -711,7 +711,7 @@ section {
 
 .tools-carousel {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--space-md);
   margin-top: var(--space-2xl);
 }

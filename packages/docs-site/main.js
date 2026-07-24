@@ -63,6 +63,9 @@ function updateCalculator() {
   const dailyReqs = dau * config.reqPerUser;
   const monthlyReqs = dailyReqs * 30;
 
+  // Estimate ~0.5KB average response → bandwidth in GB
+  const monthlyBandwidthGB = (monthlyReqs * 0.5) / (1024 * 1024); // 0.5KB per req
+
   // Update DAU display
   const dauDisplay = document.getElementById('dauDisplay');
   if (dauDisplay) {
@@ -72,10 +75,12 @@ function updateCalculator() {
   const costEl = document.getElementById('calcCostResult');
   const breakdownEl = document.getElementById('calcBreakdown');
 
-  // Cloudflare Workers Pricing:
+  // ── SparrowBase (Cloudflare Workers) Pricing ──
   // Free: 100,000 req/day (3M/month)
   // Paid: $5/mo base → includes 10M req/month → then $0.30 per million additional
+  let sparrowCost = 0;
   if (dailyReqs <= 100_000) {
+    sparrowCost = 0;
     if (costEl) {
       costEl.textContent = '$0.00 / month';
       costEl.className = 'calc-result free';
@@ -91,10 +96,10 @@ function updateCalculator() {
   } else {
     const baseCost = 5.00;
     const extraMillions = Math.max(0, (monthlyReqs - 10_000_000) / 1_000_000);
-    const totalCost = baseCost + (extraMillions * 0.30);
+    sparrowCost = baseCost + (extraMillions * 0.30);
 
     if (costEl) {
-      costEl.textContent = `$${totalCost.toFixed(2)} / month`;
+      costEl.textContent = `$${sparrowCost.toFixed(2)} / month`;
       costEl.className = 'calc-result paid';
     }
     if (breakdownEl) {
@@ -106,6 +111,62 @@ function updateCalculator() {
       `;
     }
   }
+
+  // ── Competitor Cost Calculations (official pricing) ──
+
+  // Vercel Pro: $20/mo base. 1M serverless function invocations included.
+  // Then $0.60 per additional million. Bandwidth: 1TB included, then $0.15/GB.
+  const vercelBase = 20;
+  const vercelExtraInvocations = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
+  const vercelExtraBW = Math.max(0, monthlyBandwidthGB - 1000) * 0.15;
+  const vercelCost = monthlyReqs <= 100_000 ? 0 : vercelBase + vercelExtraInvocations + vercelExtraBW;
+
+  // Supabase Pro: $25/mo base. 250GB bandwidth included, then $0.09/GB. DB: 8GB included.
+  const supabaseBase = 25;
+  const supabaseExtraBW = Math.max(0, monthlyBandwidthGB - 250) * 0.09;
+  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseExtraBW;
+
+  // Firebase Blaze: $0.40 per million Cloud Function invocations. Bandwidth: $0.12/GB after 10GB.
+  const firebaseInvocations = (monthlyReqs / 1_000_000) * 0.40;
+  const firebaseExtraBW = Math.max(0, monthlyBandwidthGB - 10) * 0.12;
+  const firebaseCost = monthlyReqs <= 125_000 ? 0 : firebaseInvocations + firebaseExtraBW;
+
+  // AWS Lambda: $0.20 per million requests + $0.0000166667 per GB-second (128MB, 200ms avg).
+  // Plus S3 bandwidth: $0.09/GB after 100GB.
+  const lambdaReqCost = (monthlyReqs / 1_000_000) * 0.20;
+  const lambdaComputeGBs = monthlyReqs * 0.128 * 0.2; // 128MB × 200ms
+  const lambdaCompute = lambdaComputeGBs * 0.0000166667;
+  const lambdaExtraBW = Math.max(0, monthlyBandwidthGB - 100) * 0.09;
+  const awsCost = monthlyReqs <= 1_000_000 ? 0 : lambdaReqCost + lambdaCompute + lambdaExtraBW;
+
+  // ── Render Competitor Grid ──
+  const competitorGrid = document.getElementById('competitorCosts');
+  if (competitorGrid) {
+    const competitors = [
+      { name: '🦜 SparrowBase',   cost: sparrowCost,  color: '#10b981', note: 'Cloudflare Workers' },
+      { name: '▲ Vercel Pro',      cost: vercelCost,   color: '#f59e0b', note: '$20/mo base + $0.60/M functions' },
+      { name: '⚡ Supabase Pro',   cost: supabaseCost, color: '#f59e0b', note: '$25/mo base + $0.09/GB egress' },
+      { name: '🔥 Firebase Blaze', cost: firebaseCost, color: '#f43f5e', note: '$0.40/M invocations + $0.12/GB' },
+      { name: '☁️ AWS Lambda',     cost: awsCost,      color: '#f43f5e', note: '$0.20/M req + compute + $0.09/GB' },
+    ];
+
+    competitorGrid.innerHTML = competitors.map(c => {
+      const isCheapest = c.cost === sparrowCost && c.name.includes('Sparrow');
+      const savings = c.cost - sparrowCost;
+      return `
+        <div style="padding: 16px; border-radius: var(--radius-md); background: ${isCheapest ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isCheapest ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-default)'}; text-align: center;">
+          <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">${c.name}</div>
+          <div style="font-size: 1.5rem; font-weight: 900; color: ${c.cost === 0 ? '#10b981' : c.color}; letter-spacing: -0.02em;">
+            ${c.cost === 0 ? '$0' : '$' + c.cost.toFixed(2)}
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 4px;">${c.note}</div>
+          ${!isCheapest && savings > 0 ? `<div style="font-size: 0.72rem; color: var(--brand-rose); margin-top: 6px; font-weight: 600;">+$${savings.toFixed(2)} more than SparrowBase</div>` : ''}
+          ${isCheapest ? `<div style="font-size: 0.72rem; color: var(--brand-emerald); margin-top: 6px; font-weight: 600;">✓ Cheapest option</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
 }
 
 // ── Navigation ──

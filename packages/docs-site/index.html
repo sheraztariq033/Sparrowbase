@@ -338,6 +338,20 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
         </div>
 
         <div class="tool-card">
+          <div class="tool-logo">🧠</div>
+          <div class="tool-name">Claude Code</div>
+          <div class="tool-desc">Reads CLAUDE.md constraints for flawless Workers code</div>
+          <div class="tool-badge">✓ Auto-detected</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">🤖</div>
+          <div class="tool-name">GitHub Copilot</div>
+          <div class="tool-desc">Context-aware completions with .cursorrules constraints</div>
+          <div class="tool-badge">✓ Compatible</div>
+        </div>
+
+        <div class="tool-card">
           <div class="tool-logo">▲</div>
           <div class="tool-name">v0 by Vercel</div>
           <div class="tool-desc">Generates frontend code connecting to @sparrowbase/client</div>
@@ -359,10 +373,24 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
         </div>
 
         <div class="tool-card">
-          <div class="tool-logo">🧠</div>
-          <div class="tool-name">Claude</div>
-          <div class="tool-desc">Reads CLAUDE.md constraints for flawless Workers code</div>
+          <div class="tool-logo">🔗</div>
+          <div class="tool-name">Cline / Continue</div>
+          <div class="tool-desc">Open-source VS Code agents that read .cursorrules</div>
           <div class="tool-badge">✓ Auto-detected</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">🛠️</div>
+          <div class="tool-name">Aider</div>
+          <div class="tool-desc">Terminal-based pair programmer with project context</div>
+          <div class="tool-badge">✓ Compatible</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">💻</div>
+          <div class="tool-name">Replit Agent</div>
+          <div class="tool-desc">Full in-browser IDE with AI agent deployment</div>
+          <div class="tool-badge">✓ Compatible</div>
         </div>
       </div>
     </div>
@@ -392,99 +420,108 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
           </thead>
           <tbody>
             <tr>
-              <td><strong>Free Tier</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ 100K req/day, no expiry</span></td>
-              <td>500MB DB, auto-pauses after 1 week</td>
-              <td>100GB bandwidth, 100K function calls</td>
-              <td>1GB DB, 10GB bandwidth</td>
+              <td><strong>Free Tier (Monthly)</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 3M req/mo (100K/day), no expiry</span></td>
+              <td>500MB DB, auto-pauses after 1 week inactive</td>
+              <td>100GB bandwidth/mo, 100K function calls/mo</td>
+              <td>1GB Firestore, 10GB bandwidth/mo</td>
               <td>1M req/mo (12-month trial only)</td>
-              <td>$5 credit/mo (burns fast)</td>
+              <td>$5 credit/mo (burns fast on CPU)</td>
             </tr>
             <tr>
-              <td><strong>Bandwidth Egress</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ $0.00/GB — always free</span></td>
-              <td>$0.09/GB</td>
-              <td>$0.15–$0.40/GB</td>
-              <td>$0.12/GB</td>
-              <td>$0.09–$0.15/GB</td>
-              <td>$0.10/GB</td>
+              <td><strong>Bandwidth Egress (per GB)</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ $0.00/GB — always free, forever</span></td>
+              <td>$0.09/GB (on S3 storage)</td>
+              <td>$0.15/GB (Hobby) to $0.40/GB (overage)</td>
+              <td>$0.12/GB (Cloud Storage)</td>
+              <td>$0.09/GB (S3) to $0.15/GB (Lambda)</td>
+              <td>$0.10/GB egress</td>
             </tr>
             <tr>
-              <td><strong>Cold Start</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ 0ms (V8 Isolates)</span></td>
-              <td class="badge-partial">100–500ms (Postgres)</td>
-              <td class="badge-partial">200–1500ms (Lambda)</td>
-              <td class="badge-partial">300–2000ms (Cloud Functions)</td>
-              <td class="badge-partial">200–2000ms</td>
-              <td class="badge-partial">100–800ms (Docker)</td>
+              <td><strong>Cold Start Latency</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 0ms (V8 Isolates, no boot)</span></td>
+              <td class="badge-partial">100–500ms (Postgres connection pool)</td>
+              <td class="badge-partial">200–1500ms (Lambda container boot)</td>
+              <td class="badge-partial">300–2000ms (Cloud Functions boot)</td>
+              <td class="badge-partial">200–2000ms (container cold start)</td>
+              <td class="badge-partial">100–800ms (Docker container boot)</td>
             </tr>
             <tr>
               <td><strong>AI Rules Engine</strong></td>
               <td class="col-sparrow"><span class="badge-yes">✓ Built-in .cursorrules + CLAUDE.md</span></td>
-              <td class="badge-no">None</td>
-              <td class="badge-no">None</td>
-              <td class="badge-no">None</td>
-              <td class="badge-no">None</td>
+              <td class="badge-no">None — AI often hallucinates Prisma</td>
+              <td class="badge-no">None — AI generates Express/Node code</td>
+              <td class="badge-no">None — AI confuses Firestore APIs</td>
+              <td class="badge-no">None — AI generates incompatible SDKs</td>
               <td class="badge-no">None</td>
             </tr>
             <tr>
-              <td><strong>Database</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ D1 SQLite Edge (5M reads/day free)</span></td>
-              <td>PostgreSQL (500MB free)</td>
-              <td>Postgres (via Neon/PlanetScale)</td>
-              <td>Firestore NoSQL (1GB free)</td>
-              <td>DynamoDB (25GB free)</td>
-              <td>Postgres (512MB free)</td>
+              <td><strong>Database (Free Tier)</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ D1 SQLite: 5M reads/day (150M/mo), 100K writes/day</span></td>
+              <td>PostgreSQL: 500MB storage, pauses if inactive</td>
+              <td>No built-in DB — BYO Neon ($0) or PlanetScale</td>
+              <td>Firestore NoSQL: 1GB storage, 50K reads/day</td>
+              <td>DynamoDB: 25GB storage, 200M req/mo (trial)</td>
+              <td>Postgres: 512MB storage, 1 CPU shared</td>
             </tr>
             <tr>
-              <td><strong>File Storage</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ R2 (10GB free, $0 egress)</span></td>
-              <td>S3-compatible (1GB free)</td>
-              <td>Vercel Blob ($0.15/GB egress)</td>
-              <td>Cloud Storage ($0.12/GB egress)</td>
-              <td>S3 ($0.09/GB egress)</td>
-              <td>Volume storage only</td>
+              <td><strong>File Storage (Free Tier)</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ R2: 10GB storage, $0 egress forever</span></td>
+              <td>1GB S3-compatible, $0.09/GB egress</td>
+              <td>Vercel Blob: limited, $0.15/GB egress</td>
+              <td>Cloud Storage: 5GB, $0.12/GB egress</td>
+              <td>S3: 5GB (12-mo trial), $0.09/GB egress</td>
+              <td>Volume storage only, no CDN</td>
             </tr>
             <tr>
-              <td><strong>Auth</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ Better-Auth (Web Crypto)</span></td>
-              <td>GoTrue Auth</td>
-              <td>NextAuth / Clerk (3rd party)</td>
-              <td>Firebase Auth</td>
-              <td>Cognito</td>
-              <td>BYO solution</td>
+              <td><strong>Authentication</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Better-Auth (Web Crypto, edge-native, pre-wired)</span></td>
+              <td>GoTrue Auth (built-in, Postgres-backed)</td>
+              <td>No built-in — needs Clerk ($25/mo) or NextAuth</td>
+              <td>Firebase Auth (built-in, Google-backed)</td>
+              <td>Cognito (complex setup, IAM policies)</td>
+              <td>No built-in — BYO solution required</td>
             </tr>
             <tr>
-              <td><strong>Surprise Bills</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ Hard daily caps, no overage</span></td>
-              <td class="badge-no">Overage billing</td>
-              <td class="badge-no">Overage billing</td>
-              <td class="badge-no">Overage billing</td>
-              <td class="badge-no">Overage billing</td>
-              <td class="badge-no">Overage billing</td>
+              <td><strong>Surprise Bill Protection</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Hard daily caps — requests drop, never overage</span></td>
+              <td class="badge-no">Overage billing — can spike unexpectedly</td>
+              <td class="badge-no">Overage billing — bandwidth surprises common</td>
+              <td class="badge-no">Overage billing — Firestore can spike fast</td>
+              <td class="badge-no">Overage billing — Lambda/S3 surprise bills</td>
+              <td class="badge-no">Credit burns, then overage billing</td>
             </tr>
             <tr>
               <td><strong>Global Edge Network</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ 330+ locations</span></td>
-              <td>Single region (or read replicas $)</td>
-              <td>Edge Functions (limited regions)</td>
-              <td>Multi-region (extra cost)</td>
-              <td>Per-region deployment</td>
-              <td>Single region</td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 330+ cities, every continent</span></td>
+              <td>Single region (or read replicas at extra $)</td>
+              <td>Edge Functions: ~30 regions</td>
+              <td>Multi-region available (extra cost)</td>
+              <td>Per-region deployment (manual)</td>
+              <td>Single region only</td>
             </tr>
             <tr>
               <td><strong>Vendor Lock-in</strong></td>
-              <td class="col-sparrow"><span class="badge-yes">✓ Open source, fully portable</span></td>
-              <td>Open source core</td>
-              <td class="badge-no">Proprietary infra</td>
-              <td class="badge-no">Heavy lock-in</td>
-              <td class="badge-no">Heavy lock-in</td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Open-source, MIT license, fully portable</span></td>
+              <td>Open-source core (self-hostable)</td>
+              <td class="badge-no">Proprietary infrastructure</td>
+              <td class="badge-no">Heavy lock-in (Firebase SDKs)</td>
+              <td class="badge-no">Heavy lock-in (AWS services)</td>
               <td>Docker-based (portable)</td>
+            </tr>
+            <tr>
+              <td><strong>Paid Tier Starting Price</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ $5/mo (Cloudflare Workers Paid)</span></td>
+              <td>$25/mo (Supabase Pro)</td>
+              <td>$20/mo (Vercel Pro)</td>
+              <td>Pay-as-you-go (Blaze, no minimum)</td>
+              <td>Pay-as-you-go (no minimum)</td>
+              <td>$5/mo credit, then usage-based</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="comparison-note">Data sourced from official pricing pages as of July 2025. Railway and Supabase details are for their free tiers.</p>
+      <p class="comparison-note">All data sourced from official pricing pages as of July 2025. All "per month" and "per day" units are explicitly labeled. SparrowBase costs = Cloudflare infrastructure costs (SparrowBase itself is free and open-source).</p>
     </div>
   </section>
 
@@ -559,7 +596,7 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
       <div class="section-header reveal">
         <span class="section-badge">🧮 Calculator</span>
         <h2 class="section-title">How much will your app cost?</h2>
-        <p class="section-subtitle">Select your app type, drag the slider, and see your exact monthly bill. Based on official Cloudflare pricing.</p>
+        <p class="section-subtitle">Select your app type, drag the slider, and compare what you'd pay on SparrowBase vs. Vercel, Supabase, Firebase, and AWS for the <strong>exact same workload</strong>.</p>
       </div>
 
       <div class="calculator-card reveal">
@@ -577,6 +614,55 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
 
         <div class="calc-result free" id="calcCostResult">$0.00 / month</div>
         <div class="calc-breakdown" id="calcBreakdown">Fits 100% within Cloudflare Free Tier — 100K daily requests, 5M D1 reads, 10GB R2 storage. No credit card required.</div>
+
+        <!-- Competitor Cost Comparison Grid -->
+        <div id="costComparisonGrid" style="margin-top: var(--space-xl);">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: var(--space-md); color: var(--text-primary);">Same workload on other platforms:</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-sm);" id="competitorCosts">
+            <!-- Filled dynamically by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ BUSINESS MODEL ═══════════ -->
+  <section id="business-model" class="features-section" style="border-top: 1px solid var(--border-default);">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">💼 Business Model</span>
+        <h2 class="section-title">How SparrowBase earns revenue</h2>
+        <p class="section-subtitle">SparrowBase's open-source CLI and templates are free forever. We monetize through premium developer services and enterprise offerings.</p>
+      </div>
+
+      <div class="features-grid reveal">
+        <div class="feature-card">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-emerald">🆓</div>
+            <div class="feature-title">Free Forever (Open Source)</div>
+            <div class="feature-desc">The <code>sparrowbase</code> CLI, <code>@sparrowbase/client</code> SDK, all templates, and AI rules files are <strong>MIT licensed and free forever</strong>. You pay Cloudflare directly for infrastructure (starting at $0/mo). We never touch your data or billing.</div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-violet">💎</div>
+            <div class="feature-title">SparrowBase Pro (Coming Soon)</div>
+            <div class="feature-desc">Premium templates (SaaS starter kits, e-commerce boilerplates, multi-tenant admin panels), advanced AI rules packs, pre-built UI dashboards, and priority support. <strong>One-time purchase or $9–$29/mo subscription.</strong></div>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-blue">🏢</div>
+            <div class="feature-title">Enterprise & Consulting</div>
+            <div class="feature-desc">Custom deployment assistance, architecture review, migration from Vercel/Supabase/Firebase, dedicated Slack support, and SLA-backed managed infrastructure. <strong>Custom pricing for teams and enterprises.</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: var(--space-xl); padding: var(--space-lg); border-radius: var(--radius-lg); background: var(--bg-surface); border: 1px solid var(--border-default);" class="reveal">
+        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7;"><strong style="color: var(--text-primary);">tl;dr:</strong> SparrowBase follows the same model as Supabase, Hono.js, and Drizzle ORM — open-source core with premium services on top. Your infrastructure bill goes to Cloudflare. Our revenue comes from Pro templates, enterprise support, and consulting.</p>
       </div>
     </div>
   </section>
@@ -587,7 +673,7 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
       <div class="section-header reveal">
         <span class="section-badge">💰 Pricing</span>
         <h2 class="section-title">Official Cloudflare Pricing</h2>
-        <p class="section-subtitle">SparrowBase is free and open-source. You only pay Cloudflare directly for infrastructure usage. Here are the exact numbers.</p>
+        <p class="section-subtitle">SparrowBase is free and open-source. You only pay Cloudflare directly for infrastructure usage. Better-Auth is pre-configured and working — email/password, OAuth, and session management all run natively on Workers with zero additional cost.</p>
       </div>
 
       <div class="pricing-grid reveal">
