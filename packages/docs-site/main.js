@@ -1,122 +1,199 @@
-let selectedAppType = 'saas'; // saas | social | ecommerce | ai
+// ═══════════════════════════════════════════
+// SparrowBase Landing Page — Interactive Logic
+// ═══════════════════════════════════════════
 
-const appMultipliers = {
-  saas: { name: 'SaaS Dashboard', reqPerUserPerDay: 5, label: '~20,000 DAU for $0/mo' },
-  social: { name: 'Social Media / Chat', reqPerUserPerDay: 25, label: '~4,000 DAU for $0/mo' },
-  ecommerce: { name: 'E-Commerce / Blog', reqPerUserPerDay: 10, label: '~10,000 DAU for $0/mo' },
-  ai: { name: 'AI RAG / Vector App', reqPerUserPerDay: 40, label: '~2,500 DAU for $0/mo' },
+// ── App Type Config ──
+const APP_TYPES = {
+  saas:      { name: 'SaaS Dashboard',     reqPerUser: 5,  color: '#3b82f6' },
+  ecommerce: { name: 'E-Commerce / Blog',  reqPerUser: 10, color: '#06b6d4' },
+  social:    { name: 'Social / Chat App',   reqPerUser: 25, color: '#8b5cf6' },
+  ai:        { name: 'AI RAG / Vector App', reqPerUser: 40, color: '#f59e0b' },
 };
 
-function selectAppType(type) {
-  selectedAppType = type;
-  document.querySelectorAll('.app-type-btn').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = document.querySelector(`[onclick="selectAppType('${type}')"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-  updateCalc();
+let currentAppType = 'saas';
+
+// ── Code Tab Switcher ──
+function switchTab(tabId) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+
+  const tab = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+  const panel = document.getElementById(tabId);
+  if (tab) tab.classList.add('active');
+  if (panel) panel.classList.add('active');
 }
 
-function selectTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.code-snippet').forEach(snippet => snippet.classList.remove('active'));
-
-  const activeBtn = document.querySelector(`[onclick="selectTab('${tabId}')"]`);
-  const activeSnippet = document.getElementById(tabId);
-
-  if (activeBtn) activeBtn.classList.add('active');
-  if (activeSnippet) activeSnippet.classList.add('active');
+// ── Copy Helpers ──
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
 }
 
-function copyActiveCode() {
-  const activeSnippet = document.querySelector('.code-snippet.active');
-  if (!activeSnippet) return;
-
-  const textToCopy = activeSnippet.textContent.trim();
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    showToast('Copied to clipboard!');
-  });
+function copyActivePanel() {
+  const active = document.querySelector('.code-panel.active');
+  if (active) {
+    navigator.clipboard.writeText(active.textContent.trim()).then(() => showToast('Code copied!'));
+  }
 }
 
+// ── Toast ──
 function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
-
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2500);
+  setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-function openDocsModal() {
-  const modal = document.getElementById('docsModal');
-  if (modal) modal.classList.add('active');
+// ── App Type Selector ──
+function selectAppType(type) {
+  currentAppType = type;
+  document.querySelectorAll('.app-type-pill').forEach(p => p.classList.remove('active'));
+  const active = document.querySelector(`[onclick="selectAppType('${type}')"]`);
+  if (active) active.classList.add('active');
+  updateCalculator();
 }
 
-function closeDocsModal() {
-  const modal = document.getElementById('docsModal');
-  if (modal) modal.classList.remove('active');
-}
+// ── Cost Calculator ──
+function updateCalculator() {
+  const slider = document.getElementById('dauSlider');
+  if (!slider) return;
 
-function updateCalc() {
-  const userSlider = document.getElementById('userSlider');
-  if (!userSlider) return;
-
-  const dau = parseInt(userSlider.value, 10);
-  const appConfig = appMultipliers[selectedAppType] || appMultipliers.saas;
-
-  const dailyReqs = dau * appConfig.reqPerUserPerDay;
+  const dau = parseInt(slider.value, 10);
+  const config = APP_TYPES[currentAppType] || APP_TYPES.saas;
+  const dailyReqs = dau * config.reqPerUser;
   const monthlyReqs = dailyReqs * 30;
 
-  const reqCountText = document.getElementById('calcReqCount');
-  const costText = document.getElementById('calcCost');
-  const detailsText = document.getElementById('calcDetails');
-
-  if (reqCountText) {
-    reqCountText.textContent = `${dau.toLocaleString()} Daily Active Users → ~${dailyReqs.toLocaleString()} req/day (${(monthlyReqs / 1000000).toFixed(2)}M req/month)`;
+  // Update DAU display
+  const dauDisplay = document.getElementById('dauDisplay');
+  if (dauDisplay) {
+    dauDisplay.textContent = `${dau.toLocaleString()} Daily Active Users → ${dailyReqs.toLocaleString()} req/day (${(monthlyReqs / 1e6).toFixed(1)}M/month)`;
   }
 
-  // Official Cloudflare Workers Pricing Calculation:
-  // Free Tier: 100,000 req/day (3 Million req/month)
-  // Paid Workers: $5/month base (includes 10 Million req/month) + $0.30 per million additional
-  if (dailyReqs <= 100000) {
-    if (costText) {
-      costText.textContent = '$0.00 / month (100% Free)';
-      costText.style.color = '#10b981';
+  const costEl = document.getElementById('calcCostResult');
+  const breakdownEl = document.getElementById('calcBreakdown');
+
+  // Cloudflare Workers Pricing:
+  // Free: 100,000 req/day (3M/month)
+  // Paid: $5/mo base → includes 10M req/month → then $0.30 per million additional
+  if (dailyReqs <= 100_000) {
+    if (costEl) {
+      costEl.textContent = '$0.00 / month';
+      costEl.className = 'calc-result free';
     }
-    if (detailsText) {
-      detailsText.textContent = `Fits 100% within Cloudflare Free Tier (100k daily reqs, 5M D1 DB reads, 10GB R2 storage). Zero credit card required!`;
+    if (breakdownEl) {
+      breakdownEl.innerHTML = `
+        <strong>100% Free Tier</strong> — No credit card required.<br>
+        Your ${config.name} at ${dau.toLocaleString()} DAU uses ${dailyReqs.toLocaleString()} of 100,000 daily requests 
+        (${Math.round(dailyReqs / 1000)}% utilization). 
+        Plus 5M D1 reads/day, 10GB R2 storage, and $0 bandwidth egress.
+      `;
     }
   } else {
-    const paidBaseCost = 5.00; // $5/mo fixed Workers Paid tier
-    const extraMillions = Math.max(0, (monthlyReqs - 10000000) / 1000000);
-    const totalCost = paidBaseCost + (extraMillions * 0.30);
+    const baseCost = 5.00;
+    const extraMillions = Math.max(0, (monthlyReqs - 10_000_000) / 1_000_000);
+    const totalCost = baseCost + (extraMillions * 0.30);
 
-    if (costText) {
-      costText.textContent = `$${totalCost.toFixed(2)} / month`;
-      costText.style.color = '#38bdf8';
+    if (costEl) {
+      costEl.textContent = `$${totalCost.toFixed(2)} / month`;
+      costEl.className = 'calc-result paid';
     }
-    if (detailsText) {
-      detailsText.textContent = `Includes Cloudflare Workers Paid ($5/mo for 10M reqs) + $0.30 per additional million requests. Unlimited D1 Databases ($0.75/GB) and $0 bandwidth egress!`;
+    if (breakdownEl) {
+      breakdownEl.innerHTML = `
+        <strong>Workers Paid Tier</strong> — $5/mo base includes 10M requests/month.<br>
+        Your ${config.name} at ${dau.toLocaleString()} DAU generates ${(monthlyReqs / 1e6).toFixed(1)}M monthly requests.
+        ${extraMillions > 0 ? `Overage: ${extraMillions.toFixed(1)}M × $0.30 = $${(extraMillions * 0.30).toFixed(2)}` : 'No overage charges.'} 
+        All bandwidth egress is $0.
+      `;
     }
   }
 }
 
-async function testLivePing() {
-  const pingText = document.getElementById('livePingMs');
-  const start = Date.now();
+// ── Navigation ──
+function scrollToCode() {
+  const codeWindow = document.getElementById('codeWindow');
+  if (codeWindow) {
+    codeWindow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    switchTab('tab-quickstart');
+  }
+}
+
+function toggleMobileMenu() {
+  const nav = document.getElementById('navLinks');
+  if (nav) nav.classList.toggle('mobile-open');
+}
+
+// ── Live Latency Ping ──
+async function testEdgeLatency() {
+  const el = document.getElementById('liveLatency');
+  if (!el) return;
+
+  const start = performance.now();
   try {
     const res = await fetch('https://sparrowbase-backend.lastlook-pk.workers.dev/api/health');
     const data = await res.json();
-    const duration = Date.now() - start;
-    if (pingText) {
-      pingText.textContent = `${duration}ms (${data.edge?.coloRegion || 'Edge'} Region Node)`;
-    }
-  } catch (err) {
-    if (pingText) pingText.textContent = `12ms (Singapore Edge Node)`;
+    const ms = Math.round(performance.now() - start);
+    el.textContent = `${ms}ms (${data.edge?.coloRegion || 'Edge'})`;
+  } catch {
+    el.textContent = '< 50ms (Edge)';
   }
 }
 
+// ── Scroll Reveal Observer ──
+function setupRevealObserver() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+}
+
+// ── Navbar Scroll Effect ──
+function setupNavbarScroll() {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      header.style.borderBottomColor = 'rgba(255,255,255,0.08)';
+      header.style.background = 'rgba(5, 5, 6, 0.92)';
+    } else {
+      header.style.borderBottomColor = 'rgba(255,255,255,0.06)';
+      header.style.background = 'rgba(5, 5, 6, 0.8)';
+    }
+  });
+}
+
+// ── Smooth scroll for anchor links ──
+function setupSmoothAnchors() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Close mobile menu if open
+        const nav = document.getElementById('navLinks');
+        if (nav) nav.classList.remove('mobile-open');
+      }
+    });
+  });
+}
+
+// ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  testLivePing();
-  updateCalc();
+  updateCalculator();
+  testEdgeLatency();
+  setupRevealObserver();
+  setupNavbarScroll();
+  setupSmoothAnchors();
 });

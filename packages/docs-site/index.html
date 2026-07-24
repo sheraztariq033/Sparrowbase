@@ -3,446 +3,755 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SparrowBase | $0 Cloudflare Edge Backend Platform & AI Rules Engine</title>
-  <meta name="description" content="SparrowBase (sparrowbase.dev) is the $0-starter, edge-native backend platform and AI rules engine for Vibe Coders using Cursor, Windsurf, v0, and Claude.">
+  <title>SparrowBase — The Open-Source Edge Backend Platform for AI-Native Developers</title>
+  <meta name="description" content="SparrowBase is the $0-to-start, open-source backend platform on Cloudflare Edge. Auth, Database, Storage, AI Vector Search, and Rate Limiting — all pre-wired for Cursor, Windsurf, v0, and Claude.">
+  <meta name="keywords" content="sparrowbase, cloudflare workers, edge backend, supabase alternative, vercel alternative, vibe coding, cursor IDE, windsurf, hono.js, d1 database">
+  <meta property="og:title" content="SparrowBase — Edge Backend for AI-Native Developers">
+  <meta property="og:description" content="Zero cold starts. Zero egress fees. Zero hallucinated code. The backend platform AI coding tools actually understand.">
+  <meta property="og:type" content="website">
   <link rel="stylesheet" href="style.css">
-  <script src="main.js" defer></script>
 </head>
 <body>
 
-  <div class="bg-grid"></div>
-  <div class="glow-orb glow-1"></div>
-  <div class="glow-orb glow-2"></div>
-  <div class="glow-orb glow-3"></div>
+  <div class="ambient-bg"></div>
 
-  <!-- Header Navbar -->
-  <header>
+  <!-- ═══════════ NAVBAR ═══════════ -->
+  <header class="site-header">
     <div class="container navbar">
-      <a href="#" class="logo">
-        <span>🦜 SparrowBase</span>
-        <span class="logo-badge">v1.0 EDGE</span>
+      <a href="#" class="nav-brand">
+        <span class="nav-brand-icon">🦜</span>
+        <span>SparrowBase</span>
+        <span class="nav-version">v1.0</span>
       </a>
 
-      <ul class="nav-menu">
-        <li><a href="#ai-tools">AI Coding Tools</a></li>
-        <li><a href="#comparison">SparrowBase vs Competitors</a></li>
-        <li><a href="#plain-english">Plain English Limits</a></li>
-        <li><a href="#calculator">Cost Calculator</a></li>
-        <li><a href="javascript:void(0)" onclick="openDocsModal()">Developer Docs</a></li>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#ai-tools">AI Tools</a></li>
+        <li><a href="#comparison">Compare</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#docs">Docs</a></li>
       </ul>
 
-      <div class="nav-cta">
-        <a href="https://github.com/sparrowbase/sparrowbase" target="_blank" class="btn btn-glass">GitHub</a>
-        <button class="btn btn-primary" onclick="selectTab('tab-init'); document.getElementById('code-container').scrollIntoView();">Get Started</button>
+      <div class="nav-actions">
+        <a href="https://github.com/sparrowbase/sparrowbase" target="_blank" class="btn btn-ghost" id="githubBtn">
+          <span class="btn-icon">⭐</span> Star on GitHub
+        </a>
+        <button class="btn btn-primary" onclick="scrollToCode()">Get Started</button>
+        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">☰</button>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- ═══════════ HERO ═══════════ -->
   <section class="hero">
     <div class="container">
-      <div class="hero-pill">
-        <span class="pulse-dot"></span>
-        <span>The $0 Cloudflare Platform for Vibe Coders</span>
-      </div>
-
-      <h1 class="hero-title">
-        The Open Backend Platform<br>
-        <span>Engineered for AI Vibe Coders</span>
-      </h1>
-
-      <p class="hero-subtitle">
-        SparrowBase turns Cursor, Windsurf, v0, and Claude into production senior developers. 
-        Zero server bills, zero token security risk, and zero hallucinated code on Cloudflare Edge.
-      </p>
-
-      <div class="hero-buttons">
-        <button class="btn btn-primary" onclick="copyActiveCode()">
-          <span>npx sparrowbase init</span>
-        </button>
-        <button class="btn btn-glass" onclick="openDocsModal()">Open Developer Docs</button>
-      </div>
-
-      <!-- Interactive Code Snippet Component -->
-      <div class="code-preview-container" id="code-container">
-        <div class="code-header">
-          <div class="window-dots">
-            <span class="dot-close"></span>
-            <span class="dot-min"></span>
-            <span class="dot-max"></span>
-          </div>
-
-          <div class="code-tabs">
-            <button class="tab-btn active" onclick="selectTab('tab-init')">1. CLI Init</button>
-            <button class="tab-btn" onclick="selectTab('tab-rules')">2. AI Agent Rules</button>
-            <button class="tab-btn" onclick="selectTab('tab-client')">3. Client SDK</button>
-            <button class="tab-btn" onclick="selectTab('tab-server')">4. Hono + D1 Server</button>
-          </div>
+      <div class="hero-content">
+        <div class="hero-announcement">
+          <span class="pulse"></span>
+          <span>Now open-source — deploy your first edge app in 60 seconds</span>
         </div>
 
+        <h1 class="hero-title">
+          The backend platform<br>
+          <span class="gradient-text">AI coding tools understand</span>
+        </h1>
+
+        <p class="hero-description">
+          SparrowBase gives Cursor, Windsurf, v0, Lovable, Bolt, and Claude a pre-wired Cloudflare Edge backend
+          with Auth, Database, Storage, AI Search, and Rate Limiting — so they generate
+          <strong>production-grade code on the first try</strong>, not hallucinated Express.js that crashes at deploy.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="copyText('npx sparrowbase init my-app')">
+            <span class="btn-icon">⚡</span>
+            npx sparrowbase init
+          </button>
+          <a href="#docs" class="btn btn-secondary btn-lg">
+            <span class="btn-icon">📖</span>
+            Read the Docs
+          </a>
+          <a href="#calculator" class="btn btn-ghost btn-lg">
+            <span class="btn-icon">🧮</span>
+            Cost Calculator
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">0ms</div>
+            <div class="hero-stat-label">Cold Start Latency</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">$0</div>
+            <div class="hero-stat-label">Bandwidth Egress</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">100K</div>
+            <div class="hero-stat-label">Free Requests/Day</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">330+</div>
+            <div class="hero-stat-label">Edge Locations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Window -->
+      <div class="code-window" id="codeWindow">
+        <div class="code-window-bar">
+          <div class="code-window-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchTab('tab-quickstart')">Quick Start</button>
+            <button class="code-tab" onclick="switchTab('tab-ai-rules')">AI Rules Engine</button>
+            <button class="code-tab" onclick="switchTab('tab-client-sdk')">Client SDK</button>
+            <button class="code-tab" onclick="switchTab('tab-api-server')">API Server</button>
+            <button class="code-tab" onclick="switchTab('tab-schema')">Database Schema</button>
+          </div>
+          <div class="code-window-actions">
+            <button class="code-copy" onclick="copyActivePanel()">Copy</button>
+          </div>
+        </div>
         <div class="code-body">
-          <button class="code-copy-btn" onclick="copyActiveCode()">Copy Code</button>
+          <!-- Quick Start -->
+          <div class="code-panel active" id="tab-quickstart"><span class="hl-cmt"># 1. Create a new SparrowBase project</span>
+<span class="hl-var">$</span> npx sparrowbase init my-saas-app
 
-          <!-- Tab 1: CLI Init -->
-          <div id="tab-init" class="code-snippet active">
-// 1. Initialize a new SparrowBase production edge app
-$ npx sparrowbase init my-app
+<span class="hl-cmt"># 2. Install dependencies</span>
+<span class="hl-var">$</span> cd my-saas-app && npm install
 
-// 2. Provision $0 Cloudflare D1 Database & R2 Storage
-$ cd my-app && npm install
-$ npx wrangler d1 create sparrowbase-db
-$ npx wrangler r2 bucket create sparrowbase-uploads
+<span class="hl-cmt"># 3. Provision free Cloudflare resources</span>
+<span class="hl-var">$</span> npx wrangler d1 create sparrowbase-db
+<span class="hl-var">$</span> npx wrangler r2 bucket create uploads
+<span class="hl-var">$</span> npx wrangler kv namespace create CACHE
 
-// 3. Start local edge development server
-$ npm run dev</div>
+<span class="hl-cmt"># 4. Run local development server (Miniflare)</span>
+<span class="hl-var">$</span> npm run dev
+<span class="hl-cmt"># → Server running at http://localhost:8787</span>
 
-          <!-- Tab 2: AI Agent Rules -->
-          <div id="tab-rules" class="code-snippet">
-// .sparrowbase/CLAUDE.md & .cursorrules
-// Teaches Cursor, Windsurf, v0, and Claude exact Workers compatibility rules
+<span class="hl-cmt"># 5. Deploy to Cloudflare Edge (330+ locations)</span>
+<span class="hl-var">$</span> npx wrangler deploy
+<span class="hl-cmt"># → Published to https://my-saas-app.workers.dev</span></div>
 
-- NO NODE.JS NATIVE MODULES: Never import 'fs', 'net', 'tls', or 'express'.
-- AUTHENTICATION: Use Better-Auth + Web Crypto API in Cloudflare D1.
-- ROUTING: Use Hono.js edge routing ('import { Hono } from "hono"').
-- DATABASE: Use Drizzle ORM connected to D1 ('drizzle(c.env.DB)').</div>
+          <!-- AI Rules Engine -->
+          <div class="code-panel" id="tab-ai-rules"><span class="hl-cmt">// .sparrowbase/CLAUDE.md — Auto-loaded by AI coding agents</span>
+<span class="hl-cmt">// This file teaches Cursor, Windsurf, v0, and Claude how to</span>
+<span class="hl-cmt">// write 100% compatible Cloudflare Workers code.</span>
 
-          <!-- Tab 3: Client SDK -->
-          <div id="tab-client" class="code-snippet">
-import { createSparrowClient } from '@sparrowbase/client';
+<span class="hl-cmt">## Runtime Constraints</span>
+- <span class="hl-kw">NEVER</span> import Node.js modules: <span class="hl-str">fs</span>, <span class="hl-str">net</span>, <span class="hl-str">tls</span>, <span class="hl-str">http</span>, <span class="hl-str">child_process</span>
+- <span class="hl-kw">NEVER</span> use <span class="hl-str">express</span>, <span class="hl-str">fastify</span>, <span class="hl-str">koa</span>, or <span class="hl-str">next/server</span>
+- <span class="hl-kw">NEVER</span> use <span class="hl-str">bcrypt</span> or <span class="hl-str">jsonwebtoken</span> (native C++ bindings)
+- <span class="hl-kw">ALWAYS</span> use <span class="hl-str">Hono.js</span> for routing
+- <span class="hl-kw">ALWAYS</span> use <span class="hl-str">crypto.subtle</span> (Web Crypto API) for hashing
+- <span class="hl-kw">ALWAYS</span> use <span class="hl-str">Drizzle ORM</span> with <span class="hl-str">D1</span> for database access
 
-const sparrow = createSparrowClient({ baseUrl: 'https://api.sparrowbase.dev' });
+<span class="hl-cmt">## Available Bindings</span>
+- <span class="hl-type">DB</span>       → D1 SQLite database (via Drizzle ORM)
+- <span class="hl-type">CACHE</span>    → KV key-value store (rate limiting)
+- <span class="hl-type">UPLOADS</span>  → R2 object storage (file uploads)
+- <span class="hl-type">AI</span>       → Workers AI (embeddings, inference)
+- <span class="hl-type">VECTORIZE</span>→ Vector index (RAG search)</div>
 
-// Direct 2-step streaming R2 file upload helper
-const file = event.target.files[0];
-const upload = await sparrow.uploadFile(file, 'user_123');
-console.log('File live at:', upload.publicUrl);
+          <!-- Client SDK -->
+          <div class="code-panel" id="tab-client-sdk"><span class="hl-kw">import</span> { createSparrowClient } <span class="hl-kw">from</span> <span class="hl-str">'@sparrowbase/client'</span>;
 
-// AI Vector Search & RAG Query
-const results = await sparrow.ai.search('edge native databases');</div>
+<span class="hl-cmt">// Initialize type-safe client</span>
+<span class="hl-kw">const</span> <span class="hl-var">sparrow</span> = <span class="hl-fn">createSparrowClient</span>({
+  baseUrl: <span class="hl-str">'https://api.myapp.workers.dev'</span>,
+});
 
-          <!-- Tab 4: Hono + D1 Server -->
-          <div id="tab-server" class="code-snippet">
-import { Hono } from 'hono';
-import { getDb } from './db';
-import { rateLimiter } from './middleware/rate-limit';
+<span class="hl-cmt">// Authentication</span>
+<span class="hl-kw">const</span> { user, session } = <span class="hl-kw">await</span> sparrow.auth.<span class="hl-fn">signUp</span>({
+  email: <span class="hl-str">'dev@example.com'</span>,
+  password: <span class="hl-str">'securePassword123'</span>,
+});
 
-const app = new Hono();
-app.use('/api/*', rateLimiter({ limit: 100 }));
+<span class="hl-cmt">// Database queries (type-safe)</span>
+<span class="hl-kw">const</span> users = <span class="hl-kw">await</span> sparrow.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>);
 
-app.get('/api/users', async (c) => {
-  const db = getDb(c.env.DB);
-  const users = await db.query.users.findMany();
-  return c.json({ success: true, users });
+<span class="hl-cmt">// Direct streaming file upload to R2</span>
+<span class="hl-kw">const</span> { publicUrl } = <span class="hl-kw">await</span> sparrow.<span class="hl-fn">uploadFile</span>(file, <span class="hl-str">'user_123'</span>);
+
+<span class="hl-cmt">// AI vector search (RAG)</span>
+<span class="hl-kw">const</span> results = <span class="hl-kw">await</span> sparrow.ai.<span class="hl-fn">search</span>(<span class="hl-str">'edge native databases'</span>);</div>
+
+          <!-- API Server -->
+          <div class="code-panel" id="tab-api-server"><span class="hl-kw">import</span> { Hono } <span class="hl-kw">from</span> <span class="hl-str">'hono'</span>;
+<span class="hl-kw">import</span> { cors } <span class="hl-kw">from</span> <span class="hl-str">'hono/cors'</span>;
+<span class="hl-kw">import</span> { getDb } <span class="hl-kw">from</span> <span class="hl-str">'./db'</span>;
+<span class="hl-kw">import</span> { rateLimiter } <span class="hl-kw">from</span> <span class="hl-str">'./middleware/rate-limit'</span>;
+<span class="hl-kw">import</span> { authMiddleware } <span class="hl-kw">from</span> <span class="hl-str">'./middleware/auth'</span>;
+
+<span class="hl-kw">const</span> <span class="hl-var">app</span> = <span class="hl-kw">new</span> <span class="hl-fn">Hono</span>();
+
+<span class="hl-cmt">// Global middleware</span>
+app.<span class="hl-fn">use</span>(<span class="hl-str">'*'</span>, <span class="hl-fn">cors</span>());
+app.<span class="hl-fn">use</span>(<span class="hl-str">'/api/*'</span>, <span class="hl-fn">rateLimiter</span>({ limit: <span class="hl-num">100</span>, window: <span class="hl-num">60</span> }));
+
+<span class="hl-cmt">// Health check</span>
+app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/health'</span>, (c) => c.<span class="hl-fn">json</span>({ status: <span class="hl-str">'healthy'</span> }));
+
+<span class="hl-cmt">// Protected route with auth</span>
+app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, authMiddleware, <span class="hl-kw">async</span> (c) => {
+  <span class="hl-kw">const</span> db = <span class="hl-fn">getDb</span>(c.env.<span class="hl-type">DB</span>);
+  <span class="hl-kw">const</span> users = <span class="hl-kw">await</span> db.query.users.<span class="hl-fn">findMany</span>();
+  <span class="hl-kw">return</span> c.<span class="hl-fn">json</span>({ success: <span class="hl-num">true</span>, data: users });
+});
+
+<span class="hl-kw">export default</span> app;</div>
+
+          <!-- Database Schema -->
+          <div class="code-panel" id="tab-schema"><span class="hl-kw">import</span> { sqliteTable, text, integer } <span class="hl-kw">from</span> <span class="hl-str">'drizzle-orm/sqlite-core'</span>;
+
+<span class="hl-cmt">// Multi-tenant user table</span>
+<span class="hl-kw">export const</span> <span class="hl-var">users</span> = <span class="hl-fn">sqliteTable</span>(<span class="hl-str">'users'</span>, {
+  id:        <span class="hl-fn">text</span>(<span class="hl-str">'id'</span>).<span class="hl-fn">primaryKey</span>(),
+  email:     <span class="hl-fn">text</span>(<span class="hl-str">'email'</span>).<span class="hl-fn">notNull</span>().<span class="hl-fn">unique</span>(),
+  name:      <span class="hl-fn">text</span>(<span class="hl-str">'name'</span>),
+  orgId:     <span class="hl-fn">text</span>(<span class="hl-str">'org_id'</span>).<span class="hl-fn">references</span>(() => orgs.id),
+  createdAt: <span class="hl-fn">integer</span>(<span class="hl-str">'created_at'</span>, { mode: <span class="hl-str">'timestamp'</span> }),
+});
+
+<span class="hl-cmt">// Organization for multi-tenancy</span>
+<span class="hl-kw">export const</span> <span class="hl-var">orgs</span> = <span class="hl-fn">sqliteTable</span>(<span class="hl-str">'organizations'</span>, {
+  id:       <span class="hl-fn">text</span>(<span class="hl-str">'id'</span>).<span class="hl-fn">primaryKey</span>(),
+  name:     <span class="hl-fn">text</span>(<span class="hl-str">'name'</span>).<span class="hl-fn">notNull</span>(),
+  plan:     <span class="hl-fn">text</span>(<span class="hl-str">'plan'</span>).<span class="hl-fn">default</span>(<span class="hl-str">'free'</span>),
+  stripeId: <span class="hl-fn">text</span>(<span class="hl-str">'stripe_customer_id'</span>),
+});
+
+<span class="hl-cmt">// Subscription tracking</span>
+<span class="hl-kw">export const</span> <span class="hl-var">subscriptions</span> = <span class="hl-fn">sqliteTable</span>(<span class="hl-str">'subscriptions'</span>, {
+  id:       <span class="hl-fn">text</span>(<span class="hl-str">'id'</span>).<span class="hl-fn">primaryKey</span>(),
+  orgId:    <span class="hl-fn">text</span>(<span class="hl-str">'org_id'</span>).<span class="hl-fn">references</span>(() => orgs.id),
+  status:   <span class="hl-fn">text</span>(<span class="hl-str">'status'</span>).<span class="hl-fn">default</span>(<span class="hl-str">'active'</span>),
+  plan:     <span class="hl-fn">text</span>(<span class="hl-str">'plan'</span>).<span class="hl-fn">default</span>(<span class="hl-str">'free'</span>),
 });</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Compatible AI Coding Tools Section -->
-  <section id="ai-tools" class="ai-tools-section">
+  <!-- ═══════════ FEATURES BENTO GRID ═══════════ -->
+  <section id="features" class="features-section">
     <div class="container">
-      <div class="section-head">
-        <h2>Compatible With All AI Coding Tools</h2>
-        <p>SparrowBase embeds <code>.sparrowbase/CLAUDE.md</code> and <code>.cursorrules</code> into your project so any AI assistant writes 100% accurate, error-free Cloudflare Workers code on the first try.</p>
+      <div class="section-header reveal">
+        <span class="section-badge">⚡ Platform Features</span>
+        <h2 class="section-title">Everything you need to ship.<br>Nothing you don't.</h2>
+        <p class="section-subtitle">SparrowBase includes Auth, Database, File Storage, AI Search, Rate Limiting, Stripe Billing, and an AI Rules Engine — all pre-configured for Cloudflare's edge runtime.</p>
       </div>
 
-      <div class="tools-grid">
-        <div class="tool-card">
-          <div class="tool-icon">⚡</div>
-          <div class="tool-info">
-            <h4>Cursor IDE</h4>
-            <p>Reads <code>.cursorrules</code> automatically to generate Hono & D1 routes seamlessly.</p>
+      <div class="features-grid">
+        <div class="feature-card feature-card-wide reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-violet">🧠</div>
+            <div class="feature-title">AI Rules Engine (.cursorrules + CLAUDE.md)</div>
+            <div class="feature-desc">The secret weapon. SparrowBase embeds machine-readable constraint files into every project. When you open your codebase in Cursor, Windsurf, v0, Lovable, Bolt, or Claude — the AI reads these rules and generates code that is 100% compatible with Cloudflare Workers. No more <code>import express</code> or <code>require('fs')</code> hallucinations. No more broken deploys. The AI just works.</div>
+            <div class="feature-code">.sparrowbase/CLAUDE.md  ·  .cursorrules  ·  .windsurfrules</div>
           </div>
         </div>
 
-        <div class="tool-card">
-          <div class="tool-icon">🌊</div>
-          <div class="tool-info">
-            <h4>Windsurf</h4>
-            <p>Full cascade agent integration with zero hallucinated Node.js modules.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-blue">🔐</div>
+            <div class="feature-title">Authentication (Better-Auth)</div>
+            <div class="feature-desc">Email/password, OAuth, and session management using Better-Auth with Web Crypto API. No native Node.js modules — runs natively on Workers. Includes multi-tenant organization memberships out of the box.</div>
+            <div class="feature-code">crypto.subtle.importKey() → Web Crypto HMAC</div>
           </div>
         </div>
 
-        <div class="tool-card">
-          <div class="tool-icon">▲</div>
-          <div class="tool-info">
-            <h4>v0 by Vercel</h4>
-            <p>Generates frontend code that connects directly to <code>@sparrowbase/client</code>.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-cyan">🗄️</div>
+            <div class="feature-title">Database (D1 + Drizzle ORM)</div>
+            <div class="feature-desc">SQLite at the edge with Drizzle ORM. Full type-safe queries, migration support, and multi-tenant schemas. 5 million free reads per day — enough for 150 million queries per month at $0.</div>
+            <div class="feature-code">const db = drizzle(c.env.DB);</div>
           </div>
         </div>
 
-        <div class="tool-card">
-          <div class="tool-icon">❤️</div>
-          <div class="tool-info">
-            <h4>Lovable.dev</h4>
-            <p>Build full-stack web applications with 1-click backend edge integration.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-emerald">📦</div>
+            <div class="feature-title">File Storage (R2)</div>
+            <div class="feature-desc">Direct streaming uploads to Cloudflare R2 with zero egress fees. Unlike AWS S3 ($0.09/GB) or Vercel Blob ($0.15/GB), R2 charges $0 for bandwidth — forever. Includes pre-signed URL support and 10GB free storage.</div>
+            <div class="feature-code">await c.env.UPLOADS.put(key, stream);</div>
           </div>
         </div>
 
-        <div class="tool-card">
-          <div class="tool-icon">⚡</div>
-          <div class="tool-info">
-            <h4>Bolt.new</h4>
-            <p>WebContainer in-browser execution with native SparrowBase edge schemas.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-amber">🔍</div>
+            <div class="feature-title">AI Vector Search (Vectorize)</div>
+            <div class="feature-desc">Embed text with Workers AI and query a vector index for semantic search, RAG pipelines, and recommendation engines. Pre-wired with 768-dimension embeddings and cosine similarity.</div>
+            <div class="feature-code">c.env.VECTORIZE.query(embedding, { topK: 10 })</div>
           </div>
         </div>
 
-        <div class="tool-card">
-          <div class="tool-icon">🧠</div>
-          <div class="tool-info">
-            <h4>Claude Artifacts</h4>
-            <p>Reads <code>CLAUDE.md</code> constraints for flawless TypeScript Workers generation.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-rose">🛡️</div>
+            <div class="feature-title">Rate Limiting (KV)</div>
+            <div class="feature-desc">Sliding-window rate limiter backed by Workers KV. Protects your API from abuse with configurable limits per IP, user, or API key. 100,000 free KV reads per day — no external Redis needed.</div>
+            <div class="feature-code">rateLimiter({ limit: 100, window: 60 })</div>
+          </div>
+        </div>
+
+        <div class="feature-card feature-card-wide reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-blue">💳</div>
+            <div class="feature-title">Stripe Billing (Webhook-Ready)</div>
+            <div class="feature-desc">Pre-configured Stripe webhook handler that validates signatures using <code>ArrayBuffer</code> (not <code>JSON.parse</code>, which breaks Stripe's HMAC). Handles <code>checkout.session.completed</code>, <code>invoice.paid</code>, <code>customer.subscription.deleted</code>, and <code>customer.subscription.updated</code> events. Includes subscription status tracking in D1 and multi-tenant org billing.</div>
+            <div class="feature-code">const sig = c.req.header('stripe-signature'); // ArrayBuffer body verification</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Competitive Comparison Matrix Section -->
-  <section id="comparison" class="compare-section">
+  <!-- ═══════════ AI TOOLS COMPATIBILITY ═══════════ -->
+  <section id="ai-tools" class="tools-section">
     <div class="container">
-      <div class="section-head">
-        <h2>Why Choose SparrowBase over Competitors?</h2>
-        <p>See how SparrowBase compares to Supabase, Vercel, Firebase, and AWS on pricing, bandwidth, and AI compatibility.</p>
+      <div class="section-header reveal">
+        <span class="section-badge">🤖 AI-Native</span>
+        <h2 class="section-title">Works with every AI coding tool</h2>
+        <p class="section-subtitle">SparrowBase embeds <code>.cursorrules</code>, <code>CLAUDE.md</code>, and <code>.windsurfrules</code> into every project. Open your codebase in any AI tool — it reads the rules and writes correct edge code on the first try.</p>
       </div>
 
-      <table class="compare-matrix-table">
-        <thead>
-          <tr>
-            <th>Feature / Dimension</th>
-            <th class="compare-highlight">🦜 SparrowBase</th>
-            <th>Supabase</th>
-            <th>Vercel</th>
-            <th>Firebase</th>
-            <th>AWS S3 / Lambda</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Starter Free Tier</strong></td>
-            <td class="compare-highlight"><span class="check-yes">100k req/day ($0)</span></td>
-            <td>500MB DB (Pauses)</td>
-            <td>100GB Bandwidth</td>
-            <td>1GB DB Limit</td>
-            <td>12 Months Free Limit</td>
-          </tr>
-          <tr>
-            <td><strong>Bandwidth Egress Fees</strong></td>
-            <td class="compare-highlight"><span class="check-yes">$0.00 / GB (Always Free)</span></td>
-            <td>$0.09 / GB</td>
-            <td>$0.15 - $0.40 / GB</td>
-            <td>$0.12 / GB</td>
-            <td>$0.09 - $0.15 / GB</td>
-          </tr>
-          <tr>
-            <td><strong>Cold Start Latency</strong></td>
-            <td class="compare-highlight"><span class="check-yes">0ms (V8 Edge Isolates)</span></td>
-            <td><span class="check-partial">100ms - 500ms</span></td>
-            <td><span class="check-partial">200ms - 1500ms</span></td>
-            <td><span class="check-partial">300ms - 2000ms</span></td>
-            <td><span class="check-partial">200ms - 2000ms</span></td>
-          </tr>
-          <tr>
-            <td><strong>AI Vibe Rules Engine</strong></td>
-            <td class="compare-highlight"><span class="check-yes">Built-In (.sparrowbase)</span></td>
-            <td><span class="check-no">None</span></td>
-            <td><span class="check-no">None</span></td>
-            <td><span class="check-no">None</span></td>
-            <td><span class="check-no">None</span></td>
-          </tr>
-          <tr>
-            <td><strong>Token Custody / Security</strong></td>
-            <td class="compare-highlight"><span class="check-yes">100% BYOK Local-First</span></td>
-            <td>Hosted SaaS Custody</td>
-            <td>Hosted SaaS Custody</td>
-            <td>Hosted SaaS Custody</td>
-            <td>IAM Credentials</td>
-          </tr>
-          <tr>
-            <td><strong>Surprise Bill Protection</strong></td>
-            <td class="compare-highlight"><span class="check-yes">Hard Daily Caps ($0)</span></td>
-            <td><span class="check-no">Overage Billing</span></td>
-            <td><span class="check-no">Overage Billing</span></td>
-            <td><span class="check-no">Overage Billing</span></td>
-            <td><span class="check-no">Overage Billing</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="tools-carousel reveal">
+        <div class="tool-card">
+          <div class="tool-logo">⚡</div>
+          <div class="tool-name">Cursor</div>
+          <div class="tool-desc">Auto-reads .cursorrules for Hono & D1 route generation</div>
+          <div class="tool-badge">✓ Auto-detected</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">🌊</div>
+          <div class="tool-name">Windsurf</div>
+          <div class="tool-desc">Full cascade agent with zero hallucinated Node.js imports</div>
+          <div class="tool-badge">✓ Auto-detected</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">▲</div>
+          <div class="tool-name">v0 by Vercel</div>
+          <div class="tool-desc">Generates frontend code connecting to @sparrowbase/client</div>
+          <div class="tool-badge">✓ Compatible</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">❤️</div>
+          <div class="tool-name">Lovable</div>
+          <div class="tool-desc">1-click full-stack apps with SparrowBase edge backend</div>
+          <div class="tool-badge">✓ Compatible</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">⚡</div>
+          <div class="tool-name">Bolt.new</div>
+          <div class="tool-desc">In-browser WebContainer with native edge schemas</div>
+          <div class="tool-badge">✓ Compatible</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-logo">🧠</div>
+          <div class="tool-name">Claude</div>
+          <div class="tool-desc">Reads CLAUDE.md constraints for flawless Workers code</div>
+          <div class="tool-badge">✓ Auto-detected</div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Plain English Quota Breakdown Section -->
-  <section id="plain-english" class="explain-section">
+  <!-- ═══════════ COMPETITIVE COMPARISON ═══════════ -->
+  <section id="comparison" class="comparison-section">
     <div class="container">
-      <div class="section-head">
-        <h2>What Do Cloudflare's Limits Mean for Your App?</h2>
-        <p>We translated raw infrastructure metrics into real-world daily active user (DAU) workloads.</p>
+      <div class="section-header reveal">
+        <span class="section-badge">📊 Compare</span>
+        <h2 class="section-title">SparrowBase vs. the competition</h2>
+        <p class="section-subtitle">Side-by-side comparison on the dimensions that actually matter: pricing, performance, DX, and AI compatibility.</p>
       </div>
 
-      <div class="explain-grid">
-        <div class="explain-card">
-          <div class="explain-tag">SaaS Dashboard Workload</div>
-          <h3>100,000 Req / Day</h3>
-          <div class="big-stat">~20,000 DAU</div>
-          <p>If your users average 5 API requests per session (e.g. login, load dashboard, update settings), your app can support <strong>20,000 daily active users for $0/mo</strong>.</p>
-          <div class="usecase-badges">
-            <span class="usecase-badge">B2B SaaS</span>
-            <span class="usecase-badge">Admin Tools</span>
-          </div>
-        </div>
-
-        <div class="explain-card">
-          <div class="explain-tag">Social App Workload</div>
-          <h3>100,000 Req / Day</h3>
-          <div class="big-stat">~4,000 DAU</div>
-          <p>Interactive social or chat apps generate ~25 requests per session (feed scroll, comments, likes). You can support <strong>4,000 active daily users for $0/mo</strong>.</p>
-          <div class="usecase-badges">
-            <span class="usecase-badge">Chat App</span>
-            <span class="usecase-badge">Social Feed</span>
-          </div>
-        </div>
-
-        <div class="explain-card">
-          <div class="explain-tag">E-Commerce / Blog</div>
-          <h3>100,000 Req / Day</h3>
-          <div class="big-stat">~10,000 DAU</div>
-          <p>Browsing products or reading articles averages ~10 requests per visitor. You can serve <strong>10,000 active daily shoppers for $0/mo</strong>.</p>
-          <div class="usecase-badges">
-            <span class="usecase-badge">Storefront</span>
-            <span class="usecase-badge">Media Site</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interactive Calculator Component -->
-      <div id="calculator" class="calc-card">
-        <h3 class="calc-title">Interactive Cost Calculator</h3>
-        <p style="color: var(--text-muted); margin-bottom: 20px;">Select your application type and drag the daily active user slider:</p>
-
-        <!-- App Type Selector -->
-        <div class="app-type-selector">
-          <button class="app-type-btn active" onclick="selectAppType('saas')">SaaS Dashboard (5 req/user)</button>
-          <button class="app-type-btn" onclick="selectAppType('social')">Social / Chat App (25 req/user)</button>
-          <button class="app-type-btn" onclick="selectAppType('ecommerce')">E-Commerce / Blog (10 req/user)</button>
-          <button class="app-type-btn" onclick="selectAppType('ai')">AI RAG App (40 req/user)</button>
-        </div>
-
-        <div class="calc-slider-box">
-          <input type="range" id="userSlider" min="500" max="50000" step="500" value="5000" oninput="updateCalc()">
-          <div id="calcReqCount" style="margin-top: 12px; font-weight: 600; color: var(--cyan);">5,000 Daily Active Users</div>
-        </div>
-
-        <div class="calc-result" id="calcCost">$0.00 / month (100% Free)</div>
-        <div class="calc-details" id="calcDetails">Fits 100% within Cloudflare Free Tier!</div>
-      </div>
-
-      <!-- Official Cloudflare Pricing Comparison Table -->
-      <div id="pricing-table" class="pricing-table-section">
-        <h2 style="text-align: center; font-size: 2rem; font-weight: 800;">Official Cloudflare Pricing Match</h2>
-        <p style="text-align: center; color: var(--text-muted); margin-top: 8px;">Direct comparison between Free Tier and Workers Paid Tier.</p>
-
-        <table class="pricing-table">
+      <div class="comparison-wrapper reveal">
+        <table class="comparison-table">
           <thead>
             <tr>
-              <th>Cloudflare Resource</th>
-              <th>Free Tier Cap ($0/mo)</th>
-              <th>Workers Paid Tier ($5/mo Base)</th>
+              <th style="min-width:200px;">Dimension</th>
+              <th class="col-sparrow-head">🦜 SparrowBase</th>
+              <th>Supabase</th>
+              <th>Vercel</th>
+              <th>Firebase</th>
+              <th>AWS Lambda</th>
+              <th>Railway</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Workers Serverless Compute</strong></td>
-              <td>100,000 requests / day (3M / mo)</td>
-              <td>10 Million req / mo included (then $0.30/M)</td>
+              <td><strong>Free Tier</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 100K req/day, no expiry</span></td>
+              <td>500MB DB, auto-pauses after 1 week</td>
+              <td>100GB bandwidth, 100K function calls</td>
+              <td>1GB DB, 10GB bandwidth</td>
+              <td>1M req/mo (12-month trial only)</td>
+              <td>$5 credit/mo (burns fast)</td>
             </tr>
             <tr>
-              <td><strong>D1 SQLite Database Reads</strong></td>
-              <td>5 Million reads / day</td>
-              <td>25 Million reads / day included (then $0.001/M)</td>
+              <td><strong>Bandwidth Egress</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ $0.00/GB — always free</span></td>
+              <td>$0.09/GB</td>
+              <td>$0.15–$0.40/GB</td>
+              <td>$0.12/GB</td>
+              <td>$0.09–$0.15/GB</td>
+              <td>$0.10/GB</td>
             </tr>
             <tr>
-              <td><strong>D1 SQLite Database Writes</strong></td>
-              <td>100,000 writes / day</td>
-              <td>50,000 writes / day included (then $1.00/M)</td>
+              <td><strong>Cold Start</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 0ms (V8 Isolates)</span></td>
+              <td class="badge-partial">100–500ms (Postgres)</td>
+              <td class="badge-partial">200–1500ms (Lambda)</td>
+              <td class="badge-partial">300–2000ms (Cloud Functions)</td>
+              <td class="badge-partial">200–2000ms</td>
+              <td class="badge-partial">100–800ms (Docker)</td>
             </tr>
             <tr>
-              <td><strong>R2 Object Storage</strong></td>
-              <td>10 GB Storage</td>
-              <td>$0.015 / GB-month storage</td>
+              <td><strong>AI Rules Engine</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Built-in .cursorrules + CLAUDE.md</span></td>
+              <td class="badge-no">None</td>
+              <td class="badge-no">None</td>
+              <td class="badge-no">None</td>
+              <td class="badge-no">None</td>
+              <td class="badge-no">None</td>
             </tr>
             <tr>
-              <td><strong>R2 Bandwidth Egress Fees</strong></td>
-              <td><strong>$0.00 / GB (Always Free)</strong></td>
-              <td><strong>$0.00 / GB (Always Free)</strong></td>
+              <td><strong>Database</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ D1 SQLite Edge (5M reads/day free)</span></td>
+              <td>PostgreSQL (500MB free)</td>
+              <td>Postgres (via Neon/PlanetScale)</td>
+              <td>Firestore NoSQL (1GB free)</td>
+              <td>DynamoDB (25GB free)</td>
+              <td>Postgres (512MB free)</td>
             </tr>
             <tr>
-              <td><strong>KV Key-Value Cache Reads</strong></td>
-              <td>100,000 reads / day</td>
-              <td>$0.50 / Million reads</td>
+              <td><strong>File Storage</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ R2 (10GB free, $0 egress)</span></td>
+              <td>S3-compatible (1GB free)</td>
+              <td>Vercel Blob ($0.15/GB egress)</td>
+              <td>Cloud Storage ($0.12/GB egress)</td>
+              <td>S3 ($0.09/GB egress)</td>
+              <td>Volume storage only</td>
+            </tr>
+            <tr>
+              <td><strong>Auth</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Better-Auth (Web Crypto)</span></td>
+              <td>GoTrue Auth</td>
+              <td>NextAuth / Clerk (3rd party)</td>
+              <td>Firebase Auth</td>
+              <td>Cognito</td>
+              <td>BYO solution</td>
+            </tr>
+            <tr>
+              <td><strong>Surprise Bills</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Hard daily caps, no overage</span></td>
+              <td class="badge-no">Overage billing</td>
+              <td class="badge-no">Overage billing</td>
+              <td class="badge-no">Overage billing</td>
+              <td class="badge-no">Overage billing</td>
+              <td class="badge-no">Overage billing</td>
+            </tr>
+            <tr>
+              <td><strong>Global Edge Network</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ 330+ locations</span></td>
+              <td>Single region (or read replicas $)</td>
+              <td>Edge Functions (limited regions)</td>
+              <td>Multi-region (extra cost)</td>
+              <td>Per-region deployment</td>
+              <td>Single region</td>
+            </tr>
+            <tr>
+              <td><strong>Vendor Lock-in</strong></td>
+              <td class="col-sparrow"><span class="badge-yes">✓ Open source, fully portable</span></td>
+              <td>Open source core</td>
+              <td class="badge-no">Proprietary infra</td>
+              <td class="badge-no">Heavy lock-in</td>
+              <td class="badge-no">Heavy lock-in</td>
+              <td>Docker-based (portable)</td>
             </tr>
           </tbody>
         </table>
       </div>
-
-      <!-- Live Edge Status Component -->
-      <div class="status-bar">
-        <div class="status-indicator">
-          <span class="pulse-dot"></span>
-          <span>Live Edge Region Latency:</span>
-        </div>
-        <div style="font-family: var(--font-mono); font-weight: 700; color: var(--cyan);" id="livePingMs">12ms (Singapore Edge Node)</div>
-      </div>
-
+      <p class="comparison-note">Data sourced from official pricing pages as of July 2025. Railway and Supabase details are for their free tiers.</p>
     </div>
   </section>
 
-  <!-- Interactive Developer Docs Drawer / Modal -->
-  <div id="docsModal" class="modal-overlay">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeDocsModal()">✕</button>
-      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 16px; color: var(--cyan);">SparrowBase Developer Documentation</h2>
-      
-      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">1. Initializing a Project</h3>
-      <p style="color: var(--text-muted); margin-bottom: 12px;">Run the CLI scaffolder to set up Hono, D1, Better-Auth, and AI rules:</p>
-      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);">npx sparrowbase init my-app</pre>
-
-      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">2. Setting Up Cloudflare Resources ($0 Free Tier)</h3>
-      <p style="color: var(--text-muted); margin-bottom: 12px;">Authenticate once with Wrangler and provision D1 & R2:</p>
-      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);">npx wrangler login
-npx wrangler d1 create sparrowbase-db
-npx wrangler r2 bucket create sparrowbase-uploads</pre>
-
-      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">3. AI Vibe Coding Integration</h3>
-      <p style="color: var(--text-muted); margin-bottom: 12px;">Open the generated folder in <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>v0</strong>, or <strong>Claude</strong>. The embedded <code>.sparrowbase/CLAUDE.md</code> rulepack automatically enforces Cloudflare Workers edge compatibility.</p>
-
-      <h3 style="margin-top: 24px; font-size: 1.2rem; color: #fff;">4. Deploying to Cloudflare Pages & Workers</h3>
-      <pre style="background: #090d16; padding: 16px; border-radius: 8px; color: var(--cyan); font-family: var(--font-mono);"># Deploy Frontend to Cloudflare Pages
-npx wrangler pages deploy packages/docs-site --project-name=sparrowbase
-
-# Deploy Edge Backend Worker
-npx wrangler deploy</pre>
-
-      <div style="margin-top: 32px; text-align: right;">
-        <button class="btn btn-primary" onclick="closeDocsModal()">Close Documentation</button>
+  <!-- ═══════════ PLAIN ENGLISH SECTION ═══════════ -->
+  <section class="plain-english-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">💡 Plain English</span>
+        <h2 class="section-title">What "100K requests/day" actually means</h2>
+        <p class="section-subtitle">We translated Cloudflare's raw infrastructure limits into real-world daily active user (DAU) workloads — so you know exactly how many users your app can handle for free.</p>
       </div>
+
+      <div class="workload-grid reveal">
+        <div class="workload-card">
+          <div class="workload-type">SaaS Dashboard</div>
+          <div class="workload-title">5 requests per user session</div>
+          <div class="workload-big-number">20,000 DAU</div>
+          <div class="workload-explain">Login, load dashboard, 2 data queries, 1 settings update. Your typical B2B SaaS app or admin panel can handle <strong>20,000 daily active users for $0/mo</strong>.</div>
+          <div class="workload-tags">
+            <span class="workload-tag">CRM</span>
+            <span class="workload-tag">Admin Panel</span>
+            <span class="workload-tag">Analytics</span>
+            <span class="workload-tag">Project Management</span>
+          </div>
+        </div>
+
+        <div class="workload-card">
+          <div class="workload-type">E-Commerce / Blog</div>
+          <div class="workload-title">10 requests per visitor session</div>
+          <div class="workload-big-number">10,000 DAU</div>
+          <div class="workload-explain">Homepage, category browse, product pages, cart, and checkout. Your store can handle <strong>10,000 daily shoppers for $0/mo</strong> with zero bandwidth charges.</div>
+          <div class="workload-tags">
+            <span class="workload-tag">Storefront</span>
+            <span class="workload-tag">Blog</span>
+            <span class="workload-tag">Media Site</span>
+            <span class="workload-tag">Portfolio</span>
+          </div>
+        </div>
+
+        <div class="workload-card">
+          <div class="workload-type">Social / Chat App</div>
+          <div class="workload-title">25 requests per user session</div>
+          <div class="workload-big-number">4,000 DAU</div>
+          <div class="workload-explain">Feed scroll, comments, likes, DMs, and real-time updates. Interactive apps can support <strong>4,000 daily active users for $0/mo</strong>.</div>
+          <div class="workload-tags">
+            <span class="workload-tag">Social Feed</span>
+            <span class="workload-tag">Chat</span>
+            <span class="workload-tag">Forums</span>
+            <span class="workload-tag">Community</span>
+          </div>
+        </div>
+
+        <div class="workload-card">
+          <div class="workload-type">AI RAG / Vector App</div>
+          <div class="workload-title">40 requests per user session</div>
+          <div class="workload-big-number">2,500 DAU</div>
+          <div class="workload-explain">Embedding generation, vector search, LLM inference, and result rendering. Heavy AI workloads can handle <strong>2,500 daily users for $0/mo</strong>.</div>
+          <div class="workload-tags">
+            <span class="workload-tag">AI Search</span>
+            <span class="workload-tag">Chatbot</span>
+            <span class="workload-tag">Doc QA</span>
+            <span class="workload-tag">Recommendation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ COST CALCULATOR ═══════════ -->
+  <section id="calculator" class="calculator-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">🧮 Calculator</span>
+        <h2 class="section-title">How much will your app cost?</h2>
+        <p class="section-subtitle">Select your app type, drag the slider, and see your exact monthly bill. Based on official Cloudflare pricing.</p>
+      </div>
+
+      <div class="calculator-card reveal">
+        <div class="app-type-pills">
+          <button class="app-type-pill active" onclick="selectAppType('saas')">SaaS (5 req/user)</button>
+          <button class="app-type-pill" onclick="selectAppType('ecommerce')">E-Commerce (10 req/user)</button>
+          <button class="app-type-pill" onclick="selectAppType('social')">Social (25 req/user)</button>
+          <button class="app-type-pill" onclick="selectAppType('ai')">AI RAG (40 req/user)</button>
+        </div>
+
+        <div class="calc-slider-container">
+          <input type="range" class="calc-slider" id="dauSlider" min="500" max="100000" step="500" value="5000" oninput="updateCalculator()">
+          <div class="calc-dau-display" id="dauDisplay">5,000 Daily Active Users → 25,000 req/day</div>
+        </div>
+
+        <div class="calc-result free" id="calcCostResult">$0.00 / month</div>
+        <div class="calc-breakdown" id="calcBreakdown">Fits 100% within Cloudflare Free Tier — 100K daily requests, 5M D1 reads, 10GB R2 storage. No credit card required.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PRICING PLANS ═══════════ -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">💰 Pricing</span>
+        <h2 class="section-title">Official Cloudflare Pricing</h2>
+        <p class="section-subtitle">SparrowBase is free and open-source. You only pay Cloudflare directly for infrastructure usage. Here are the exact numbers.</p>
+      </div>
+
+      <div class="pricing-grid reveal">
+        <div class="pricing-card">
+          <div class="pricing-plan-name">Free Tier</div>
+          <div class="pricing-price">$0 <span>/month</span></div>
+          <div class="pricing-desc">Perfect for MVPs, side projects, and early-stage startups. No credit card required. No time limit.</div>
+          <ul class="pricing-features">
+            <li><span class="pricing-check">✓</span> 100,000 Worker requests / day (3M / month)</li>
+            <li><span class="pricing-check">✓</span> 5 Million D1 database reads / day</li>
+            <li><span class="pricing-check">✓</span> 100,000 D1 database writes / day</li>
+            <li><span class="pricing-check">✓</span> 10 GB R2 object storage</li>
+            <li><span class="pricing-check">✓</span> $0.00 / GB bandwidth egress (always free)</li>
+            <li><span class="pricing-check">✓</span> 100,000 KV reads / day</li>
+            <li><span class="pricing-check">✓</span> 10ms CPU time per request</li>
+            <li><span class="pricing-check">✓</span> Workers AI (limited free usage)</li>
+          </ul>
+          <button class="btn btn-secondary btn-lg" style="width:100%;margin-top:var(--space-lg);" onclick="copyText('npx sparrowbase init my-app')">Start Free →</button>
+        </div>
+
+        <div class="pricing-card featured">
+          <div class="pricing-plan-name">Workers Paid</div>
+          <div class="pricing-price">$5 <span>/month base</span></div>
+          <div class="pricing-desc">For production apps scaling beyond free limits. Includes generous included usage with predictable pay-per-use overage.</div>
+          <ul class="pricing-features">
+            <li><span class="pricing-check">✓</span> 10 Million requests / month included</li>
+            <li><span class="pricing-check">✓</span> Then $0.30 / million additional requests</li>
+            <li><span class="pricing-check">✓</span> 25 Million D1 reads / day included</li>
+            <li><span class="pricing-check">✓</span> Then $0.001 / million reads overage</li>
+            <li><span class="pricing-check">✓</span> 50,000 D1 writes / day included</li>
+            <li><span class="pricing-check">✓</span> Then $1.00 / million writes overage</li>
+            <li><span class="pricing-check">✓</span> R2 storage $0.015 / GB-month</li>
+            <li><span class="pricing-check">✓</span> $0.00 / GB egress (still free!)</li>
+            <li><span class="pricing-check">✓</span> 30ms CPU time per request</li>
+            <li><span class="pricing-check">✓</span> Cron Triggers, Durable Objects, Queues</li>
+          </ul>
+          <button class="btn btn-primary btn-lg" style="width:100%;margin-top:var(--space-lg);" onclick="copyText('npx sparrowbase init my-app')">Start Building →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ GETTING STARTED DOCS ═══════════ -->
+  <section id="docs" class="docs-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">📖 Documentation</span>
+        <h2 class="section-title">Deploy to production in 4 steps</h2>
+        <p class="section-subtitle">From zero to a fully-deployed edge backend with Auth, Database, Storage, and AI — in under 5 minutes.</p>
+      </div>
+
+      <div class="docs-grid reveal">
+        <div class="doc-card">
+          <div class="doc-step">1</div>
+          <div class="doc-title">Create Your Project</div>
+          <div class="doc-desc">The CLI scaffolds a complete Hono.js + Drizzle ORM + Better-Auth project with AI rules files pre-configured. Open it in Cursor, Windsurf, or any AI IDE.</div>
+          <div class="doc-code">npx sparrowbase init my-app
+cd my-app && npm install</div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-step">2</div>
+          <div class="doc-title">Provision Cloudflare Resources</div>
+          <div class="doc-desc">Create a D1 database, R2 storage bucket, and KV namespace — all on the free tier. Copy the IDs into wrangler.toml (the CLI guides you).</div>
+          <div class="doc-code">npx wrangler login
+npx wrangler d1 create sparrowbase-db
+npx wrangler r2 bucket create uploads
+npx wrangler kv namespace create CACHE</div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-step">3</div>
+          <div class="doc-title">Develop Locally</div>
+          <div class="doc-desc">Miniflare runs a local Cloudflare Workers environment with real D1, R2, and KV bindings. Hot reload, full type checking, and Vitest unit tests.</div>
+          <div class="doc-code">npm run dev
+# → http://localhost:8787/api/health
+# → {"status":"healthy","db":"connected"}</div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-step">4</div>
+          <div class="doc-title">Deploy to Edge (330+ Locations)</div>
+          <div class="doc-desc">One command deploys your entire backend to Cloudflare's global edge network. Zero cold starts. Sub-15ms latency worldwide. Automatic HTTPS.</div>
+          <div class="doc-code">npx wrangler deploy
+# → Published to https://my-app.workers.dev
+# → 330+ global edge locations, 0ms cold start</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ LIVE STATUS STRIP ═══════════ -->
+  <div class="status-strip reveal">
+    <div class="status-item">
+      <span class="status-dot"></span>
+      <span>API Status: <strong style="color:var(--brand-emerald);">Operational</strong></span>
+    </div>
+    <div class="status-item">
+      <span>Edge Latency:</span>
+      <span class="status-value" id="liveLatency">—</span>
+    </div>
+    <div class="status-item">
+      <span>Runtime:</span>
+      <span class="status-value">Cloudflare Workers</span>
+    </div>
+    <div class="status-item">
+      <span>Version:</span>
+      <span class="status-value">v1.0.0</span>
     </div>
   </div>
 
-  <!-- Toast Element -->
-  <div id="toast" class="toast">Copied to clipboard!</div>
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="nav-brand" style="margin-bottom:4px;">
+            <span class="nav-brand-icon">🦜</span>
+            <span>SparrowBase</span>
+          </div>
+          <p class="footer-brand-desc">The open-source edge backend platform for AI-native developers. Build production apps with Cursor, Windsurf, v0, and Claude on Cloudflare's global network.</p>
+        </div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container footer-content">
-      <div>
-        <strong>🦜 SparrowBase</strong> (sparrowbase.dev) — The $0 Cloudflare Edge Platform for Vibe Coders.
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#comparison">Compare</a></li>
+            <li><a href="#calculator">Calculator</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Developers</h4>
+          <ul>
+            <li><a href="#docs">Documentation</a></li>
+            <li><a href="https://github.com/sparrowbase/sparrowbase" target="_blank">GitHub</a></li>
+            <li><a href="#codeWindow" onclick="switchTab('tab-client-sdk')">Client SDK</a></li>
+            <li><a href="#codeWindow" onclick="switchTab('tab-api-server')">API Reference</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://developers.cloudflare.com/workers/" target="_blank">Cloudflare Docs</a></li>
+            <li><a href="https://hono.dev" target="_blank">Hono.js</a></li>
+            <li><a href="https://orm.drizzle.team" target="_blank">Drizzle ORM</a></li>
+            <li><a href="https://www.better-auth.com" target="_blank">Better-Auth</a></li>
+          </ul>
+        </div>
       </div>
-      <div>
-        Released under MIT Open Source License.
+
+      <div class="footer-bottom">
+        <span>© 2025 SparrowBase. Released under MIT License.</span>
+        <span>Built on Cloudflare Workers · Deployed at the edge</span>
       </div>
     </div>
   </footer>
 
+  <!-- Toast -->
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script src="main.js"></script>
 </body>
 </html>
