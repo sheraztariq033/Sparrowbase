@@ -5,4 +5,6 @@ export function getDb(d1: D1Database) {
   return drizzle(d1, { schema });
 }
 
+export { getPostgresClient, queryPostgres } from './postgres';
 export type Database = ReturnType<typeof getDb>;
+
