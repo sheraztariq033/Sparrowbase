@@ -4,18 +4,25 @@ import { getDb } from '../db';
 import { fileUploads } from '../db/schema';
 import { EnvBindings } from '../auth';
 
-export const storageRouter = new Hono<{ Bindings: EnvBindings }>();
+export const storageRouter = new Hono<{ Bindings: EnvBindings; Variables: { userId: string; sessionId: string } }>();
 
+// ── SECURITY: userId is NO LONGER accepted from the client ──
+// It is pulled from the authenticated session (set by authGuard middleware).
 const requestUploadSchema = z.object({
   fileName: z.string().min(1),
-  fileSize: z.number().positive(),
+  fileSize: z.number().positive().max(100 * 1024 * 1024), // Max 100MB
   mimeType: z.string().min(1),
-  userId: z.string().min(1),
 });
 
 // Endpoint to request an R2 upload target or direct upload stream
 storageRouter.post('/upload', async (c) => {
   try {
+    // ── SECURITY: Get userId from authenticated session ──
+    const userId = c.get('userId') as string;
+    if (!userId) {
+      return c.json({ error: 'Unauthorized', message: 'Authentication required.' }, 401);
+    }
+
     const body = await c.req.json();
     const parsed = requestUploadSchema.parse(body);
 
@@ -23,14 +30,14 @@ storageRouter.post('/upload', async (c) => {
     const extension = parsed.fileName.includes('.')
       ? parsed.fileName.split('.').pop()
       : 'bin';
-    const r2Key = `uploads/${parsed.userId}/${fileId}.${extension}`;
+    const r2Key = `uploads/${userId}/${fileId}.${extension}`;
 
     const db = getDb(c.env.DB);
     
     // Save metadata record in D1 SQLite
     await db.insert(fileUploads).values({
       id: fileId,
-      userId: parsed.userId,
+      userId: userId,
       fileName: parsed.fileName,
       fileSize: parsed.fileSize,
       mimeType: parsed.mimeType,
@@ -47,17 +54,31 @@ storageRouter.post('/upload', async (c) => {
       publicUrl: `/api/storage/file/${fileId}`,
     });
   } catch (err: any) {
+    if (err.name === 'ZodError') {
+      return c.json({ error: 'Validation Error', details: err.errors }, 400);
+    }
     return c.json({ error: err.message || 'Invalid upload payload' }, 400);
   }
 });
 
 // Endpoint to stream upload directly into R2 bucket (Edge native)
 storageRouter.put('/raw-upload/:r2Key', async (c) => {
+  const userId = c.get('userId') as string;
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   const r2Key = decodeURIComponent(c.req.param('r2Key'));
+  
+  // ── SECURITY: Ensure user can only upload to their own path ──
+  if (!r2Key.startsWith(`uploads/${userId}/`)) {
+    return c.json({ error: 'Forbidden', message: 'Cannot upload to another user\'s storage path.' }, 403);
+  }
+
   const bucket = c.env.UPLOADS_BUCKET;
 
   if (!bucket) {
-    return c.json({ error: 'R2 Bucket UPLOADS_BUCKET not bound' }, 500);
+    return c.json({ error: 'R2 Bucket UPLOADS_BUCKET not bound. Check wrangler.toml.' }, 500);
   }
 
   const contentType = c.req.header('content-type') || 'application/octet-stream';

@@ -28,7 +28,20 @@ bucket_name = "sparrowbase-uploads"
 binding = "RATE_LIMIT_KV"
 id = "919864ee2a794a95a9ee46c18e8bac89"
 
-# Environment Variables Configuration
+# ── Environment Variables ──
 [vars]
 ENVIRONMENT = "development"
 BETTER_AUTH_URL = "http://localhost:8787"
+# Comma-separated list of allowed origins for CORS (set in production)
+# ALLOWED_ORIGINS = "https://sparrowbase.dev,https://app.sparrowbase.dev"
+
+# ── Secrets (set via `npx wrangler secret put <NAME>`) ──
+# These are NOT stored in this file — they are encrypted at rest in Cloudflare.
+#
+# REQUIRED:
+#   npx wrangler secret put BETTER_AUTH_SECRET    # Session signing key (min 32 chars)
+#
+# OPTIONAL (for email, payments):
+#   npx wrangler secret put RESEND_API_KEY        # Resend.com API key for transactional emails
+#   npx wrangler secret put STRIPE_SECRET_KEY     # Stripe secret key (sk_live_...)
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET # Stripe webhook signing secret (whsec_...)

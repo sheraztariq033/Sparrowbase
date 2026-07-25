@@ -11,9 +11,20 @@ export function rateLimiter(options: RateLimitOptions = {}) {
 
   return async (c: Context, next: Next) => {
     const kv = c.env?.RATE_LIMIT_KV as KVNamespace | undefined;
+    const environment = c.env?.ENVIRONMENT || 'development';
     
-    // Fallback if KV is not bound in local dev or test environment
+    // ── SECURITY: Warn loudly if KV is unbound in production ──
     if (!kv) {
+      if (environment === 'production') {
+        console.error(
+          '[SparrowBase CRITICAL] RATE_LIMIT_KV is not bound in production! ' +
+          'Rate limiting is DISABLED. Your API is unprotected against abuse. ' +
+          'Fix: Add [[kv_namespaces]] binding in wrangler.toml.'
+        );
+        // In production, still allow the request but log the critical issue.
+        // Alternatively, uncomment the next line to block all requests:
+        // return c.json({ error: 'Service misconfigured. Contact admin.' }, 503);
+      }
       await next();
       return;
     }
