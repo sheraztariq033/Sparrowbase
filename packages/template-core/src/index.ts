@@ -53,11 +53,15 @@ app.route('/api/health', healthRouter);
 app.route('/api/stripe', stripeRouter);
 
 // 7. ── SECURITY: Protected routes — require authenticated session ──
+import { webhookRouter } from './routes/webhooks';
+
 app.use('/api/storage/*', authGuard());
 app.use('/api/ai/*', authGuard());
+app.use('/api/webhooks/*', authGuard());
 
 app.route('/api/storage', storageRouter);
 app.route('/api/ai', aiRouter);
+app.route('/api/webhooks', webhookRouter);
 
 // 8. Root route
 app.get('/', (c) => {
