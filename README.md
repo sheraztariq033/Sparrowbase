@@ -2,6 +2,11 @@
 
 > **Zero-Cost Cloudflare Edge-Native Platform & AI Rules Engine for Vibe Coders**
 
+[![GitHub stars](https://img.shields.io/github/stars/sheraztariq033/Sparrowbase?style=flat-square&logo=github&color=10b981)](https://github.com/sheraztariq033/Sparrowbase)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Edge_Native-F38020?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com)
+[![Free Tier: $0/mo](https://img.shields.io/badge/Cost-$0_Free_Tier-10b981?style=flat-square)](https://sparrowbase.dev)
+[![Tests: 100% Pass](https://img.shields.io/badge/Tests-19%2F19_Passed-blue?style=flat-square)](https://github.com/sheraztariq033/Sparrowbase)
+
 SparrowBase is an opinionated, production-grade backend platform and AI-agent rule pack designed specifically for **Vibe Coders** using Cursor, Windsurf, v0, Lovable, or Claude.
 
 It bridges the gap between quick frontend MVPs and full production, multi-tenant applications running on **Cloudflare's $0 free tier**.
@@ -78,13 +83,21 @@ npm run test
 
 ## 📦 Monorepo Workspace Structure
 
-| Package | Directory | Description |
-| :--- | :--- | :--- |
-| **`@sparrowbase/core`** | [`packages/template-core`](packages/template-core) | Core Edge Backend Platform & Starter Template (Hono + D1 + Better-Auth + R2 + AI) |
-| **`@sparrowbase/client`** | [`packages/client`](packages/client) | Universal TypeScript SDK Client for frontend apps (React, Next.js, Vue, Node) |
-| **`sparrowbase`** | [`packages/cli`](packages/cli) | Project Scaffolding CLI (`npx sparrowbase init`) |
-| **`@sparrowbase/docs-site`** | [`packages/docs-site`](packages/docs-site) | Documentation Portal & Landing Site ([sparrowbase.dev](https://sparrowbase.dev)) |
-| **`sparrowbase-demo-app`** | [`sparrowbase-demo-app`](sparrowbase-demo-app) | Reference & Standalone Test Demo Application |
+| Package / Directory | Description |
+| :--- | :--- |
+| **`@sparrowbase/core`** ([`packages/template-core`](packages/template-core)) | Core Edge Backend Platform & Starter Template (Hono + D1 + Better-Auth + R2 + AI + Realtime) |
+| **`@sparrowbase/client`** ([`packages/client`](packages/client)) | Universal TypeScript SDK Client for frontend apps (React, Next.js, Vue, Node) |
+| **`@sparrowbase/react`** ([`packages/react`](packages/react)) | React & Next.js UI Hooks (`useSession`, `useFileUpload`, `useAIChat`, `useRealtimeChannel`) |
+| **`sparrowbase`** ([`packages/cli`](packages/cli)) | Project Scaffolding CLI, Visual Studio (`npx sparrowbase studio`) & MCP Server |
+| **`@sparrowbase/docs-site`** ([`packages/docs-site`](packages/docs-site)) | Documentation Portal & Landing Site ([sparrowbase.dev](https://sparrowbase.dev)) |
+| **`templates/nextjs-saas`** ([`templates/nextjs-saas`](templates/nextjs-saas)) | Pre-built Next.js 15 Full-Stack SaaS Starter with Dashboard, Auth & R2 Uploads |
+| **`sparrowbase-demo-app`** ([`sparrowbase-demo-app`](sparrowbase-demo-app)) | Reference & Standalone Test Demo Application |
+
+---
+
+## 🚀 Go-To-Market Launch Kit
+
+Launching SparrowBase or your app? Check out [**`LAUNCH_KIT.md`**](LAUNCH_KIT.md) for ready-to-use Product Hunt copy, viral Twitter/X threads, and Hacker News posts.
 
 ---
 

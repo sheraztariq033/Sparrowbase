@@ -4,14 +4,18 @@ import { healthRouter } from './routes/health';
 import { storageRouter } from './routes/storage';
 import { stripeRouter } from './routes/stripe';
 import { aiRouter } from './routes/ai';
+import { realtimeRouter } from './routes/realtime';
 import { rateLimiter } from './middleware/rate-limit';
 import { requestTracing } from './middleware/tracing';
+import { edgeAnalytics } from './middleware/analytics';
 import { initAuth, EnvBindings } from './auth';
+import { RealtimeRoom } from './realtime/room';
 
 const app = new Hono<{ Bindings: EnvBindings }>();
 
 // 1. Tracing & Structured Logging Middleware
 app.use('*', requestTracing());
+app.use('*', edgeAnalytics());
 
 // 2. CORS Middleware
 app.use('*', cors({
@@ -37,6 +41,7 @@ app.route('/api/health', healthRouter);
 app.route('/api/storage', storageRouter);
 app.route('/api/stripe', stripeRouter);
 app.route('/api/ai', aiRouter);
+app.route('/api/realtime', realtimeRouter);
 
 // 6. Root route
 app.get('/', (c) => {
@@ -52,9 +57,13 @@ app.get('/', (c) => {
       '/api/storage/upload',
       '/api/stripe/webhook',
       '/api/ai/embed',
+      '/api/ai/ingest',
       '/api/ai/search',
+      '/api/ai/chat/stream',
+      '/api/realtime/ws/:roomId',
     ],
   });
 });
 
+export { RealtimeRoom };
 export default app;

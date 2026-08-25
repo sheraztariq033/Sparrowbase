@@ -4,15 +4,19 @@ import { healthRouter } from './routes/health';
 import { storageRouter } from './routes/storage';
 import { stripeRouter } from './routes/stripe';
 import { aiRouter } from './routes/ai';
+import { realtimeRouter } from './routes/realtime';
 import { rateLimiter } from './middleware/rate-limit';
 import { requestTracing } from './middleware/tracing';
 import { authGuard } from './middleware/auth-guard';
+import { edgeAnalytics } from './middleware/analytics';
 import { initAuth, EnvBindings } from './auth';
+import { RealtimeRoom } from './realtime/room';
 
 const app = new Hono<{ Bindings: EnvBindings }>();
 
-// 1. Tracing & Structured Logging Middleware
+// 1. Tracing, Structured Logging & Edge Analytics Middleware
 app.use('*', requestTracing());
+app.use('*', edgeAnalytics());
 
 // 2. CORS Middleware — SECURITY: Explicit origin allowlist, not wildcard reflection
 app.use('*', cors({
@@ -62,6 +66,7 @@ app.use('/api/webhooks/*', authGuard());
 app.route('/api/storage', storageRouter);
 app.route('/api/ai', aiRouter);
 app.route('/api/webhooks', webhookRouter);
+app.route('/api/realtime', realtimeRouter);
 
 // 8. Root route
 app.get('/', (c) => {
@@ -85,9 +90,11 @@ app.get('/', (c) => {
       '/api/ai/embed (🔒 auth required)',
       '/api/ai/search (🔒 auth required)',
       '/api/ai/chat/stream (🔒 auth required)',
+      '/api/realtime/ws/:roomId (⚡ WebSocket Realtime)',
     ],
   });
 });
 
 export type AppType = typeof app;
+export { RealtimeRoom };
 export default app;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { createSparrowClient, SparrowClient, ChatMessage } from '@sparrowbase/client';
 
 const SparrowContext = createContext<SparrowClient | null>(null);
@@ -133,7 +133,6 @@ export function useAIChat(initialMessages: ChatMessage[] = []) {
     setIsLoading(true);
     setError(null);
 
-    // Placeholder assistant message
     const assistantMessage: ChatMessage = { role: 'assistant', content: '' };
     setMessages([...updatedMessages, assistantMessage]);
 
@@ -166,5 +165,75 @@ export function useAIChat(initialMessages: ChatMessage[] = []) {
     isLoading,
     error,
     setMessages,
+  };
+}
+
+export interface RealtimePeer {
+  userId: string;
+  name?: string;
+}
+
+export interface RealtimeMessage {
+  type: string;
+  sender?: RealtimePeer;
+  data?: any;
+  timestamp?: number;
+}
+
+export function useRealtimeChannel(roomId: string, user?: { userId?: string; name?: string }) {
+  const client = useSparrowClient();
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [peers, setPeers] = useState<RealtimePeer[]>([]);
+  const [messages, setMessages] = useState<RealtimeMessage[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (!roomId) return;
+
+    const wsUrl = client.realtime.getWsUrl(roomId, user);
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      setIsConnected(true);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'room_state') {
+          setPeers(msg.peers || []);
+        } else if (msg.type === 'peer_joined') {
+          setPeers((prev) => [...prev.filter((p) => p.userId !== msg.peer.userId), msg.peer]);
+        } else if (msg.type === 'peer_left') {
+          setPeers((prev) => prev.filter((p) => p.userId !== msg.peer.userId));
+        } else if (msg.type === 'message') {
+          setMessages((prev) => [...prev, msg]);
+        }
+      } catch {
+        // Ignore unparseable
+      }
+    };
+
+    ws.onclose = () => {
+      setIsConnected(false);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [client, roomId, user?.userId, user?.name]);
+
+  const sendMessage = useCallback((data: any) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(data));
+    }
+  }, []);
+
+  return {
+    isConnected,
+    peers,
+    messages,
+    sendMessage,
   };
 }

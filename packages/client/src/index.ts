@@ -181,6 +181,19 @@ export function createSparrowClient(options: SparrowClientOptions = {}) {
         return fullText;
       },
     },
+
+    // 5. Realtime WebSocket Helpers
+    realtime: {
+      getWsUrl(roomId: string, user?: { userId?: string; name?: string }) {
+        const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws';
+        const host = baseUrl.replace(/^https?:\/\//, '');
+        const params = new URLSearchParams();
+        if (user?.userId) params.set('userId', user.userId);
+        if (user?.name) params.set('name', user.name);
+        const query = params.toString() ? `?${params.toString()}` : '';
+        return `${wsProtocol}://${host}/api/realtime/ws/${roomId}${query}`;
+      },
+    },
   };
 }
 
