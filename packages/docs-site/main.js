@@ -1,4 +1,4 @@
-let selectedAppType = 'saas'; // saas | social | ecommerce | ai
+let currentAppType = 'saas'; // saas | ecommerce | social | ai
 
 const APP_TYPES = {
   saas:      { name: 'SaaS Dashboard',     reqPerUser: 5,  color: '#3b82f6' },
@@ -7,33 +7,47 @@ const APP_TYPES = {
   ai:        { name: 'AI RAG / Vector App', reqPerUser: 40, color: '#f59e0b' },
 };
 
-let currentAppType = 'saas';
-
 // ── Code Tab Switcher ──
-function switchTab(tabId) {
-  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+export function switchTab(tabId) {
+  const tabs = document.querySelectorAll('.code-tab');
+  const panels = document.querySelectorAll('.code-panel');
 
-  const tab = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
-  const panel = document.getElementById(tabId);
-  if (tab) tab.classList.add('active');
-  if (panel) panel.classList.add('active');
+  tabs.forEach(t => {
+    const onclickAttr = t.getAttribute('onclick') || '';
+    if (onclickAttr.includes(tabId)) {
+      t.classList.add('active');
+    } else {
+      t.classList.remove('active');
+    }
+  });
+
+  panels.forEach(p => {
+    if (p.id === tabId) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
 }
 
 // ── Copy Helpers ──
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+export function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+  } else {
+    showToast('Copied!');
+  }
 }
 
-function copyActivePanel() {
+export function copyActivePanel() {
   const active = document.querySelector('.code-panel.active');
   if (active) {
-    navigator.clipboard.writeText(active.textContent.trim()).then(() => showToast('Code copied!'));
+    copyText(active.textContent.trim());
   }
 }
 
 // ── Toast ──
-function showToast(message) {
+export function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
   toast.textContent = message;
@@ -42,16 +56,21 @@ function showToast(message) {
 }
 
 // ── App Type Selector ──
-function selectAppType(type) {
+export function selectAppType(type) {
   currentAppType = type;
-  document.querySelectorAll('.app-type-pill').forEach(p => p.classList.remove('active'));
-  const active = document.querySelector(`[onclick="selectAppType('${type}')"]`);
-  if (active) active.classList.add('active');
+  document.querySelectorAll('.app-type-pill').forEach(p => {
+    const onclickAttr = p.getAttribute('onclick') || '';
+    if (onclickAttr.includes(type)) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
   updateCalculator();
 }
 
 // ── Cost Calculator ──
-function updateCalculator() {
+export function updateCalculator() {
   const slider = document.getElementById('dauSlider');
   if (!slider) return;
 
@@ -63,16 +82,17 @@ function updateCalculator() {
   const dailyReqs = dau * config.reqPerUser;
   const monthlyReqs = dailyReqs * 30;
 
-  // DB queries: 10 reads, 2 writes per session/request average
-  const monthlyReads = monthlyReqs * 10;
-  const monthlyWrites = monthlyReqs * 2;
+  // DB queries: 5 reads, 1 write per session average
+  const dailyReads = dailyReqs * 5;
+  const monthlyReads = dailyReads * 30;
+  const monthlyWrites = dailyReqs * 30;
 
-  // Storage: 2MB user db footprint + 20MB file uploads (avatars/PDFs) for 10% of active users
-  const dbStorageGB = Math.max(0.1, (mau * 2) / 1024);
-  const fileStorageGB = Math.max(0.5, (mau * 0.1 * 20) / 1024);
+  // Storage footprints (realistic SaaS data)
+  const dbStorageGB = Math.max(0.01, (mau * 0.1) / 1024); // 100KB per user in D1 SQLite
+  const fileStorageGB = Math.max(0.05, (mau * 0.05 * 2) / 1024); // 5% users upload 2MB avatars/files in R2
   
-  // Bandwidth: avg response payload is 15KB + file downloads (5% of requests fetch a 3MB asset)
-  const bandwidthGB = ((monthlyReqs * 15) / (1024 * 1024)) + (monthlyReqs * 0.05 * 3) / 1024;
+  // Bandwidth: avg response payload is 10KB + file assets
+  const bandwidthGB = ((monthlyReqs * 10) / (1024 * 1024)) + (monthlyReqs * 0.02 * 1) / 1024;
 
   // Update DAU display
   const dauDisplay = document.getElementById('dauDisplay');
@@ -84,16 +104,12 @@ function updateCalculator() {
   const breakdownEl = document.getElementById('calcBreakdown');
 
   // ── SparrowBase (Cloudflare Edge) Cost ──
-  // Workers Paid is $5/mo. Includes 10M requests. Overage: $0.30/M.
-  // D1 DB reads: Paid includes 25M/day (750M/mo), then $0.001/M overage.
-  // D1 DB writes: Paid includes 50K/day (1.5M/mo), then $1.00/M overage.
-  // D1 DB storage: $0.75/GB after 5GB.
-  // R2 storage: 10GB free, then $0.015/GB. Egress is always $0.
-  // Better-Auth (self-hosted): $0/mo.
+  // Cloudflare Free Tier: 100,000 req/day (3M/mo), 5M D1 reads/day, 10GB R2 storage with $0 egress fees.
   let sparrowCost = 0;
-  if (dailyReqs <= 100_000 && dbStorageGB <= 5 && fileStorageGB <= 10) {
+  if (dailyReqs <= 100_000 && dailyReads <= 5_000_000 && dbStorageGB <= 0.5 && fileStorageGB <= 10) {
     sparrowCost = 0;
   } else {
+    // Workers Paid ($5 base includes 10M requests)
     const baseCost = 5.00;
     const extraMillions = Math.max(0, (monthlyReqs - 10_000_000) / 1_000_000);
     const computeOverage = extraMillions * 0.30;
@@ -101,7 +117,6 @@ function updateCalculator() {
     const dbReadsOverage = Math.max(0, (monthlyReads - 750_000_000) / 1_000_000) * 0.001;
     const dbWritesOverage = Math.max(0, (monthlyWrites - 1_500_000) / 1_000_000) * 1.00;
     const dbStorageOverage = Math.max(0, dbStorageGB - 5) * 0.75;
-    
     const fileStorageOverage = Math.max(0, fileStorageGB - 10) * 0.015;
     
     sparrowCost = baseCost + computeOverage + dbReadsOverage + dbWritesOverage + dbStorageOverage + fileStorageOverage;
@@ -114,59 +129,39 @@ function updateCalculator() {
 
   if (breakdownEl) {
     breakdownEl.innerHTML = sparrowCost === 0
-      ? `<strong>100% Free Tier</strong> — Uses ${dailyReqs.toLocaleString()} of 100k free daily requests. Storage (${fileStorageGB.toFixed(1)}GB R2, ${dbStorageGB.toFixed(1)}GB D1) is within limits.`
-      : `<strong>Edge Platform Pricing</strong> — $5 base includes 10M requests. Overage: compute ($${(Math.max(0, (monthlyReqs - 10_000_000)/1_000_000)*0.3).toFixed(2)}), database writes ($${(Math.max(0, (monthlyWrites - 1_500_000)/1_000_000)*1.0).toFixed(2)}), database storage ($${(Math.max(0, dbStorageGB - 5)*0.75).toFixed(2)}), R2 egress ($0.00).`;
+      ? `<strong>100% Free Tier ($0/mo)</strong> — Uses ${dailyReqs.toLocaleString()} of 100,000 free daily requests. Storage (${fileStorageGB.toFixed(2)}GB R2, ${dbStorageGB.toFixed(2)}GB D1) is within free limits.`
+      : `<strong>Edge Platform Pricing</strong> — $5 base includes 10M requests. Overage: compute ($${(Math.max(0, (monthlyReqs - 10_000_000)/1_000_000)*0.3).toFixed(2)}), D1 writes ($${(Math.max(0, (monthlyWrites - 1_500_000)/1_000_000)*1.0).toFixed(2)}), R2 egress ($0.00).`;
   }
 
   // ── Competitor: Vercel (Next.js + Neon DB + Vercel Blob + Clerk Auth) ──
-  // Auth: Clerk Pro: $25/mo base for 10k MAUs. Overage: $0.02 per MAU.
   const clerkCost = mau <= 10_000 ? 0 : 25 + (mau - 10_000) * 0.02;
-  // Compute: Vercel Pro is $20/mo (includes 1M function execution seconds). Overage average: $0.60/M.
   const vercelBase = 20;
   const vercelCompute = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
   const vercelBandwidth = Math.max(0, bandwidthGB - 100) * 0.15;
-  // Neon Postgres DB: Free up to 0.5GB. Pro is $19/mo (includes 10GB), then $0.12/GB.
   const neonCost = dbStorageGB <= 0.5 ? 0 : 19 + Math.max(0, dbStorageGB - 10) * 0.12;
-  // Vercel Blob: Free up to 250MB. Pro: $0.15/GB storage + $0.15/GB egress.
   const vercelBlobCost = fileStorageGB <= 0.25 ? 0 : (fileStorageGB * 0.15) + (bandwidthGB * 0.15);
-  
-  const vercelCost = monthlyReqs <= 100_000 ? 0 : vercelBase + vercelCompute + vercelBandwidth + clerkCost + neonCost + vercelBlobCost;
+  const vercelCost = monthlyReqs <= 50_000 ? 0 : vercelBase + vercelCompute + vercelBandwidth + clerkCost + neonCost + vercelBlobCost;
 
   // ── Competitor: Supabase (Supabase Functions + DB + Auth + Storage) ──
-  // Auth: Includes 50k MAUs. Overage: $0.00325 per MAU.
   const supabaseAuth = Math.max(0, mau - 50_000) * 0.00325;
-  // Edge Functions: $25 Pro base includes 2M. Overage: $2.00 per million.
   const supabaseBase = 25;
   const supabaseCompute = Math.max(0, (monthlyReqs - 2_000_000) / 1_000_000) * 2.00;
-  // Postgres: Pro includes 8GB. Overage: $0.125/GB.
   const supabaseDb = Math.max(0, dbStorageGB - 8) * 0.125;
-  // Storage: Pro includes 100GB. Overage: $0.021/GB storage + $0.09/GB egress.
   const supabaseStorage = Math.max(0, fileStorageGB - 100) * 0.021 + bandwidthGB * 0.09;
-
-  const supabaseCost = monthlyReqs <= 50_000 ? 0 : supabaseBase + supabaseAuth + supabaseCompute + supabaseDb + supabaseStorage;
+  const supabaseCost = monthlyReqs <= 25_000 ? 0 : supabaseBase + supabaseAuth + supabaseCompute + supabaseDb + supabaseStorage;
 
   // ── Competitor: Firebase Blaze (Cloud Functions + Firestore + Auth + Cloud Storage) ──
-  // Auth: Email/Password is free.
-  // Compute (Functions): $0.40 per million.
   const firebaseCompute = (monthlyReqs / 1_000_000) * 0.40;
-  // Firestore DB: reads $0.60/M, writes $1.80/M. Storage: $0.18/GB.
-  const firebaseDb = ((monthlyReads / 1_000_000) * 0.60) + ((monthlyWrites / 1_000_000) * 1.80) + (dbStorageGB * 0.18);
-  // Storage: $0.026/GB storage + $0.12/GB egress bandwidth.
+  const firebaseDb = ((monthlyReads / 1_000_000) * 0.60) + ((monthlyReqs / 1_000_000) * 1.80) + (dbStorageGB * 0.18);
   const firebaseStorage = (fileStorageGB * 0.026) + (bandwidthGB * 0.12);
-
-  const firebaseCost = monthlyReqs <= 100_000 ? 0 : firebaseCompute + firebaseDb + firebaseStorage;
+  const firebaseCost = monthlyReqs <= 50_000 ? 0 : firebaseCompute + firebaseDb + firebaseStorage;
 
   // ── Competitor: AWS Serverless (RDS Postgres + NAT Gateway + API Gateway + Lambda + S3 + Cognito) ──
-  // RDS db.t4g.micro instance ($15.00/mo flat) + NAT Gateway ($32.40/mo fixed) = $47.40 base.
   const awsBase = 47.40;
-  // Cognito Auth: Free for 50k MAUs, then $0.0055 per MAU.
   const awsAuth = Math.max(0, mau - 50_000) * 0.0055;
-  // Lambda ($0.20/M) + API Gateway HTTP ($1.00/M) = $1.20/M requests.
   const awsCompute = (monthlyReqs / 1_000_000) * 1.20;
-  // RDS Storage ($0.115/GB) + S3 Storage ($0.023/GB) + S3 Egress ($0.09/GB)
   const awsStorage = (dbStorageGB * 0.115) + (fileStorageGB * 0.023) + (bandwidthGB * 0.09);
-
-  const awsCost = monthlyReqs <= 100_000 ? 0 : awsBase + awsAuth + awsCompute + awsStorage;
+  const awsCost = monthlyReqs <= 50_000 ? 0 : awsBase + awsAuth + awsCompute + awsStorage;
 
   // ── Render Competitor Grid ──
   const competitorGrid = document.getElementById('competitorCosts');
@@ -190,7 +185,7 @@ function updateCalculator() {
           </div>
           <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 4px;">${c.note}</div>
           ${!isCheapest && savings > 0 ? `<div style="font-size: 0.72rem; color: var(--brand-rose); margin-top: 6px; font-weight: 600;">+$${savings.toFixed(2)} / mo more</div>` : ''}
-          ${isCheapest ? `<div style="font-size: 0.72rem; color: var(--brand-emerald); margin-top: 6px; font-weight: 600;">✓ Cheapest option</div>` : ''}
+          ${isCheapest ? `<div style="font-size: 0.72rem; color: var(--brand-emerald); margin-top: 6px; font-weight: 600;">✓ 100% Free Tier</div>` : ''}
         </div>
       `;
     }).join('');
@@ -198,7 +193,7 @@ function updateCalculator() {
 }
 
 // ── Navigation ──
-function scrollToCode() {
+export function scrollToCode() {
   const codeWindow = document.getElementById('codeWindow');
   if (codeWindow) {
     codeWindow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -207,7 +202,7 @@ function scrollToCode() {
 }
 
 // ── Toggle Mobile Menu ──
-function toggleMobileMenu() {
+export function toggleMobileMenu() {
   const nav = document.getElementById('navLinks');
   if (nav) nav.classList.toggle('mobile-open');
 }
@@ -271,7 +266,6 @@ function setupSmoothAnchors() {
       if (target) {
         e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Close mobile menu if open
         const nav = document.getElementById('navLinks');
         if (nav) nav.classList.remove('mobile-open');
       }
@@ -309,38 +303,102 @@ Use Hono for routes, Drizzle ORM with D1 SQLite for database, Better-Auth for se
 Do not introduce Node.js process/fs/buffer dependencies.`,
 
   frontend: `You are building a frontend that connects to a SparrowBase Cloudflare Edge Backend.
-Use '@sparrowbase/client' to interact with the backend:
+Use '@sparrowbase/client' or '@sparrowbase/react' to interact with the backend:
 - Initialize client with createSparrowClient({ baseUrl })
-- Authenticate via client.auth.signIn / signUp
-- Upload files directly to Cloudflare R2 via client.uploadFile(file, userId)
-- Stream real-time AI responses via client.ai.streamChat({ messages, onChunk })
-- Perform vector similarity search with client.ai.search(query, topK)`
+- Authenticate via useSession() or client.auth.signIn / signUp
+- Upload files directly to Cloudflare R2 via useFileUpload()
+- Stream real-time AI responses via useAIChat()
+- Join multiplayer rooms via useRealtimeChannel('room_id')`
 };
 
 let activePromptKey = 'cursor';
 
-function switchPromptTab(key, btn) {
+export function switchPromptTab(key, btn) {
   activePromptKey = key;
   document.querySelectorAll('.prompt-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    document.querySelectorAll('.prompt-tab').forEach(b => {
+      if (b.getAttribute('onclick')?.includes(key)) b.classList.add('active');
+    });
+  }
   const display = document.getElementById('promptCodeDisplay');
   if (display) {
     display.textContent = PROMPTS[key] || '';
   }
 }
 
-function copyActivePrompt() {
+export function copyActivePrompt() {
   const text = PROMPTS[activePromptKey] || '';
   copyText(text);
 }
 
-// ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
+// ── Attach everything directly to window so inline onclick handlers work ──
+if (typeof window !== 'undefined') {
+  window.switchTab = switchTab;
+  window.copyText = copyText;
+  window.copyActivePanel = copyActivePanel;
+  window.selectAppType = selectAppType;
+  window.updateCalculator = updateCalculator;
+  window.scrollToCode = scrollToCode;
+  window.toggleMobileMenu = toggleMobileMenu;
+  window.switchPromptTab = switchPromptTab;
+  window.copyActivePrompt = copyActivePrompt;
+  window.showToast = showToast;
+}
+
+// ── Bind event listeners directly on DOM Ready ──
+function init() {
   updateCalculator();
   testEdgeLatency();
   setupRevealObserver();
   setupNavbarScroll();
   setupSmoothAnchors();
   switchPromptTab('cursor', document.querySelector('.prompt-tab.active'));
-});
 
+  // Ensure click handlers are directly bound to all code tabs
+  document.querySelectorAll('.code-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      const onclickAttr = tab.getAttribute('onclick') || '';
+      const match = onclickAttr.match(/switchTab\(['"]([^'"]+)['"]\)/);
+      if (match && match[1]) {
+        switchTab(match[1]);
+      }
+    });
+  });
+
+  // Ensure prompt tabs are directly bound
+  document.querySelectorAll('.prompt-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      const onclickAttr = tab.getAttribute('onclick') || '';
+      const match = onclickAttr.match(/switchPromptTab\(['"]([^'"]+)['"]/);
+      if (match && match[1]) {
+        switchPromptTab(match[1], tab);
+      }
+    });
+  });
+
+  // Ensure app type pills are directly bound
+  document.querySelectorAll('.app-type-pill').forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      const onclickAttr = pill.getAttribute('onclick') || '';
+      const match = onclickAttr.match(/selectAppType\(['"]([^'"]+)['"]\)/);
+      if (match && match[1]) {
+        selectAppType(match[1]);
+      }
+    });
+  });
+
+  // Ensure slider input event listener is directly attached
+  const slider = document.getElementById('dauSlider');
+  if (slider) {
+    slider.addEventListener('input', updateCalculator);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
