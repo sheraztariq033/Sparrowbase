@@ -25,6 +25,7 @@
       </a>
 
       <ul class="nav-links" id="navLinks">
+        <li><a href="#idea-to-app" style="color: #10b981; font-weight: 700;">✨ App Builder</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#ai-tools">AI Tools</a></li>
         <li><a href="#prompt-library">AI Prompts</a></li>
@@ -270,6 +271,77 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
   plan:     <span class="hl-fn">text</span>(<span class="hl-str">'plan'</span>).<span class="hl-fn">default</span>(<span class="hl-str">'free'</span>),
 });</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ INSTANT APP BUILDER (IDEA TO APP) ═══════════ -->
+  <section id="idea-to-app" class="tools-section" style="border-top: 1px solid var(--border-default); background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, rgba(59, 130, 246, 0.02) 100%);">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+          🪄 For Non-Coders & Vibe Coders
+        </span>
+        <h2 class="section-title">Just describe your idea.<br><span class="gradient-text">AI builds your full-stack app for $0.</span></h2>
+        <p class="section-subtitle">No server configuration. No database setup. No $25/mo hosting fees. Type what you want to build in plain English, copy the generated master prompt, and paste it into Cursor, Claude, or Lovable.</p>
+      </div>
+
+      <div class="reveal" style="max-width: 920px; margin: 0 auto; background: var(--bg-1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-xl); padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        
+        <!-- Preset Idea Chips -->
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 600;">
+            💡 Click an example idea or type your own below:
+          </label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="ideaPresets">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="applyIdeaPreset('ai-pdf')">📄 AI PDF Analyzer</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="applyIdeaPreset('saas-stripe')">💳 SaaS with Stripe Billing</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="applyIdeaPreset('realtime-whiteboard')">🎨 Multiplayer Whiteboard</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="applyIdeaPreset('client-portal')">📦 Client Upload Portal</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="applyIdeaPreset('social-sms')">📱 Community with SMS OTP</button>
+          </div>
+        </div>
+
+        <!-- Idea Input Textarea -->
+        <div style="position: relative; margin-bottom: 24px;">
+          <textarea id="ideaInput" rows="3" placeholder="Describe your app idea in plain English (e.g. A marketplace for freelance writers with user profiles, PDF uploads to R2, Stripe monthly subscriptions, and AI semantic search)..." style="width: 100%; box-sizing: border-box; background: var(--bg-0); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--text-primary); padding: 16px; font-size: 0.95rem; font-family: var(--font-sans); resize: vertical; line-height: 1.5; outline: none;" oninput="generateIdeaBlueprint()"></textarea>
+        </div>
+
+        <!-- Output Card (Generated Blueprint) -->
+        <div style="background: var(--bg-0); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 20px; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-default); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981; font-weight: 700;">✨ Ready-to-Paste AI Master Prompt</span>
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="ideaAppName">Project: my-saas-app</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="copyGeneratedPrompt()" id="copyPromptBtn" style="background: #10b981; color: #000; font-weight: 700; border: none; cursor: pointer;">
+              📋 Copy Master Prompt
+            </button>
+          </div>
+
+          <!-- Preview of the Prompt -->
+          <pre id="ideaPromptOutput" style="background: var(--bg-2); padding: 16px; border-radius: var(--radius-sm); font-size: 0.82rem; line-height: 1.6; color: #a6accd; max-height: 260px; overflow-y: auto; white-space: pre-wrap; font-family: var(--font-mono); margin: 0;"></pre>
+        </div>
+
+        <!-- 3-Step Guide for Normal People -->
+        <div style="margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; border-top: 1px solid var(--border-default); padding-top: 20px;">
+          <div style="text-align: center;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">1️⃣</div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">1. Describe your idea</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Click "Copy Master Prompt" above</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">2️⃣</div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">2. Paste into Cursor or Claude</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">AI builds your database, auth & UI</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">3️⃣</div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">3. Live on Cloudflare for $0/mo</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">No servers to manage, ever</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>

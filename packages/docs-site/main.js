@@ -85,7 +85,6 @@ export function updateCalculator() {
   // DB queries: 5 reads, 1 write per session average
   const dailyReads = dailyReqs * 5;
   const monthlyReads = dailyReads * 30;
-  const monthlyWrites = dailyReqs * 30;
 
   // Storage footprints (realistic SaaS data)
   const dbStorageGB = Math.max(0.01, (mau * 0.1) / 1024); // 100KB per user in D1 SQLite
@@ -115,7 +114,7 @@ export function updateCalculator() {
     const computeOverage = extraMillions * 0.30;
     
     const dbReadsOverage = Math.max(0, (monthlyReads - 750_000_000) / 1_000_000) * 0.001;
-    const dbWritesOverage = Math.max(0, (monthlyWrites - 1_500_000) / 1_000_000) * 1.00;
+    const dbWritesOverage = Math.max(0, (monthlyReqs * 30 - 1_500_000) / 1_000_000) * 1.00;
     const dbStorageOverage = Math.max(0, dbStorageGB - 5) * 0.75;
     const fileStorageOverage = Math.max(0, fileStorageGB - 10) * 0.015;
     
@@ -130,10 +129,10 @@ export function updateCalculator() {
   if (breakdownEl) {
     breakdownEl.innerHTML = sparrowCost === 0
       ? `<strong>100% Free Tier ($0/mo)</strong> — Uses ${dailyReqs.toLocaleString()} of 100,000 free daily requests. Storage (${fileStorageGB.toFixed(2)}GB R2, ${dbStorageGB.toFixed(2)}GB D1) is within free limits.`
-      : `<strong>Edge Platform Pricing</strong> — $5 base includes 10M requests. Overage: compute ($${(Math.max(0, (monthlyReqs - 10_000_000)/1_000_000)*0.3).toFixed(2)}), D1 writes ($${(Math.max(0, (monthlyWrites - 1_500_000)/1_000_000)*1.0).toFixed(2)}), R2 egress ($0.00).`;
+      : `<strong>Edge Platform Pricing</strong> — $5 base includes 10M requests. Overage: compute ($${(Math.max(0, (monthlyReqs - 10_000_000)/1_000_000)*0.3).toFixed(2)}), D1 writes ($${(Math.max(0, (monthlyReqs * 30 - 1_500_000)/1_000_000)*1.0).toFixed(2)}), R2 egress ($0.00).`;
   }
 
-  // ── Competitor: Vercel (Next.js + Neon DB + Vercel Blob + Clerk Auth) ──
+  // ── Competitor Costs ──
   const clerkCost = mau <= 10_000 ? 0 : 25 + (mau - 10_000) * 0.02;
   const vercelBase = 20;
   const vercelCompute = Math.max(0, (monthlyReqs - 1_000_000) / 1_000_000) * 0.60;
@@ -142,7 +141,6 @@ export function updateCalculator() {
   const vercelBlobCost = fileStorageGB <= 0.25 ? 0 : (fileStorageGB * 0.15) + (bandwidthGB * 0.15);
   const vercelCost = monthlyReqs <= 50_000 ? 0 : vercelBase + vercelCompute + vercelBandwidth + clerkCost + neonCost + vercelBlobCost;
 
-  // ── Competitor: Supabase (Supabase Functions + DB + Auth + Storage) ──
   const supabaseAuth = Math.max(0, mau - 50_000) * 0.00325;
   const supabaseBase = 25;
   const supabaseCompute = Math.max(0, (monthlyReqs - 2_000_000) / 1_000_000) * 2.00;
@@ -150,13 +148,11 @@ export function updateCalculator() {
   const supabaseStorage = Math.max(0, fileStorageGB - 100) * 0.021 + bandwidthGB * 0.09;
   const supabaseCost = monthlyReqs <= 25_000 ? 0 : supabaseBase + supabaseAuth + supabaseCompute + supabaseDb + supabaseStorage;
 
-  // ── Competitor: Firebase Blaze (Cloud Functions + Firestore + Auth + Cloud Storage) ──
   const firebaseCompute = (monthlyReqs / 1_000_000) * 0.40;
-  const firebaseDb = ((monthlyReads / 1_000_000) * 0.60) + ((monthlyReqs / 1_000_000) * 1.80) + (dbStorageGB * 0.18);
+  const firebaseDb = ((dailyReads * 30 / 1_000_000) * 0.60) + ((monthlyReqs / 1_000_000) * 1.80) + (dbStorageGB * 0.18);
   const firebaseStorage = (fileStorageGB * 0.026) + (bandwidthGB * 0.12);
   const firebaseCost = monthlyReqs <= 50_000 ? 0 : firebaseCompute + firebaseDb + firebaseStorage;
 
-  // ── Competitor: AWS Serverless (RDS Postgres + NAT Gateway + API Gateway + Lambda + S3 + Cognito) ──
   const awsBase = 47.40;
   const awsAuth = Math.max(0, mau - 50_000) * 0.0055;
   const awsCompute = (monthlyReqs / 1_000_000) * 1.20;
@@ -334,7 +330,88 @@ export function copyActivePrompt() {
   copyText(text);
 }
 
-// ── Attach everything directly to window so inline onclick handlers work ──
+// ── Idea-to-App Blueprint Generator ──
+const IDEA_PRESETS = {
+  'ai-pdf': 'An AI-powered PDF analyzer and knowledge base where users upload PDF/Word documents, store them in Cloudflare R2, generate 768-dim vector embeddings with Workers AI, and chat with their documents using streaming LLM responses and Better-Auth.',
+  'saas-stripe': 'A multi-tenant SaaS application with user signup, email verification with Resend, team workspaces in D1 SQLite, and Stripe monthly/yearly Pro subscription billing with HMAC webhook synchronization.',
+  'realtime-whiteboard': 'A real-time multiplayer collaboration canvas where users join live rooms via WebSockets (Cloudflare Durable Objects), draw and move objects together with live presence indicators and zero database lockups.',
+  'client-portal': 'A secure client document portal with branded login, direct streaming file uploads to Cloudflare R2 with $0 bandwidth egress fees, activity logs, and email notifications.',
+  'social-sms': 'A mobile-friendly social community app with phone SMS verification via Twilio/Plivo, user profiles, image avatars in R2, and KV rate-limited discussion feeds.',
+};
+
+export function applyIdeaPreset(key) {
+  const input = document.getElementById('ideaInput');
+  if (input && IDEA_PRESETS[key]) {
+    input.value = IDEA_PRESETS[key];
+    generateIdeaBlueprint();
+  }
+}
+
+export function generateIdeaBlueprint() {
+  const input = document.getElementById('ideaInput');
+  const appNameEl = document.getElementById('ideaAppName');
+  const promptOutputEl = document.getElementById('ideaPromptOutput');
+  if (!input || !promptOutputEl) return;
+
+  const rawText = input.value.trim() || 'A modern full-stack web application with user authentication, D1 database storage, and AI streaming';
+
+  // Extract features
+  const hasAuth = /auth|login|signup|user|team|profile|member/i.test(rawText);
+  const hasAI = /ai|pdf|chat|vector|rag|search|embedding|bot|assistant|smart/i.test(rawText);
+  const hasStripe = /stripe|payment|billing|subscription|plan|checkout|price|credit/i.test(rawText);
+  const hasUploads = /upload|file|image|pdf|document|avatar|storage|photo|asset/i.test(rawText);
+  const hasRealtime = /realtime|real-time|multiplayer|canvas|whiteboard|live|room|socket|chat/i.test(rawText);
+  const hasSMS = /sms|phone|otp|twilio|plivo|text message/i.test(rawText);
+
+  // Generate app slug
+  let slug = rawText
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .split(/\s+/)
+    .slice(0, 3)
+    .join('-');
+  if (!slug || slug.length < 3) slug = 'my-edge-app';
+
+  if (appNameEl) {
+    appNameEl.textContent = `Project: ${slug}`;
+  }
+
+  // Build Master AI Prompt
+  let masterPrompt = `You are an expert AI software architect building a full-stack production application on Cloudflare Edge using SparrowBase.
+
+# App Idea:
+${rawText}
+
+# Pre-Configured Edge Architecture:
+- Framework: Cloudflare Workers + Hono.js (V8 isolates, 0ms cold starts, $0/mo free tier)
+- Database: Cloudflare D1 (SQLite) with Drizzle ORM (schema in src/db/schema.ts)
+${hasAuth ? '- Authentication: Better-Auth + D1 Session Store (email/password & OAuth)\n' : ''}${hasUploads ? '- Object Storage: Cloudflare R2 for direct streaming uploads ($0 bandwidth egress)\n' : ''}${hasAI ? '- AI & Vector Search: Workers AI (@cf/baai/bge-small-en-v1.5) + Vectorize RAG index\n' : ''}${hasRealtime ? '- Realtime Multiplayer: Cloudflare Durable Objects (RealtimeRoom WebSockets)\n' : ''}${hasStripe ? '- Billing: Stripe Subscriptions with HMAC-SHA256 ArrayBuffer webhook verification\n' : ''}${hasSMS ? '- SMS Dispatch: Twilio & Plivo adapters with Turnstile bot protection\n' : ''}- Frontend: Next.js 15 / React using '@sparrowbase/react' (useSession, useFileUpload, useAIChat, useRealtimeChannel)
+
+# Strict Edge Constraints:
+1. NEVER import Node.js built-ins ('fs', 'net', 'child_process', 'express', 'bcrypt').
+2. ALWAYS use Hono for routing and crypto.subtle for Web Crypto.
+3. Automatically run within Cloudflare's permanent $0 Free Tier (100k req/day, 5M D1 reads).
+
+# 1-Click Launch Command:
+npx sparrowbase init ${slug}`;
+
+  promptOutputEl.textContent = masterPrompt;
+}
+
+export function copyGeneratedPrompt() {
+  const promptOutputEl = document.getElementById('ideaPromptOutput');
+  const btn = document.getElementById('copyPromptBtn');
+  if (promptOutputEl) {
+    copyText(promptOutputEl.textContent.trim());
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+  }
+}
+
+// ── Attach everything directly to window ──
 if (typeof window !== 'undefined') {
   window.switchTab = switchTab;
   window.copyText = copyText;
@@ -346,6 +423,9 @@ if (typeof window !== 'undefined') {
   window.switchPromptTab = switchPromptTab;
   window.copyActivePrompt = copyActivePrompt;
   window.showToast = showToast;
+  window.applyIdeaPreset = applyIdeaPreset;
+  window.generateIdeaBlueprint = generateIdeaBlueprint;
+  window.copyGeneratedPrompt = copyGeneratedPrompt;
 }
 
 // ── Bind event listeners directly on DOM Ready ──
@@ -356,45 +436,37 @@ function init() {
   setupNavbarScroll();
   setupSmoothAnchors();
   switchPromptTab('cursor', document.querySelector('.prompt-tab.active'));
+  generateIdeaBlueprint();
 
-  // Ensure click handlers are directly bound to all code tabs
   document.querySelectorAll('.code-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
+    tab.addEventListener('click', () => {
       const onclickAttr = tab.getAttribute('onclick') || '';
       const match = onclickAttr.match(/switchTab\(['"]([^'"]+)['"]\)/);
-      if (match && match[1]) {
-        switchTab(match[1]);
-      }
+      if (match && match[1]) switchTab(match[1]);
     });
   });
 
-  // Ensure prompt tabs are directly bound
   document.querySelectorAll('.prompt-tab').forEach(tab => {
-    tab.addEventListener('click', (e) => {
+    tab.addEventListener('click', () => {
       const onclickAttr = tab.getAttribute('onclick') || '';
       const match = onclickAttr.match(/switchPromptTab\(['"]([^'"]+)['"]/);
-      if (match && match[1]) {
-        switchPromptTab(match[1], tab);
-      }
+      if (match && match[1]) switchPromptTab(match[1], tab);
     });
   });
 
-  // Ensure app type pills are directly bound
   document.querySelectorAll('.app-type-pill').forEach(pill => {
-    pill.addEventListener('click', (e) => {
+    pill.addEventListener('click', () => {
       const onclickAttr = pill.getAttribute('onclick') || '';
       const match = onclickAttr.match(/selectAppType\(['"]([^'"]+)['"]\)/);
-      if (match && match[1]) {
-        selectAppType(match[1]);
-      }
+      if (match && match[1]) selectAppType(match[1]);
     });
   });
 
-  // Ensure slider input event listener is directly attached
   const slider = document.getElementById('dauSlider');
-  if (slider) {
-    slider.addEventListener('input', updateCalculator);
-  }
+  if (slider) slider.addEventListener('input', updateCalculator);
+
+  const ideaInput = document.getElementById('ideaInput');
+  if (ideaInput) ideaInput.addEventListener('input', generateIdeaBlueprint);
 }
 
 if (document.readyState === 'loading') {
