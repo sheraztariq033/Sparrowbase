@@ -986,7 +986,6 @@ npx wrangler kv namespace create CACHE</div>
             <li><a href="https://github.com/sheraztariq033/Sparrowbase" target="_blank">GitHub</a></li>
             <li><a href="#codeWindow" onclick="switchTab('tab-client-sdk')">Client SDK</a></li>
             <li><a href="#codeWindow" onclick="switchTab('tab-api-server')">API Reference</a></li>
-            <li><a href="#admin" onclick="openAdminModal(event)" style="color:var(--brand-emerald);font-size:0.82rem;font-weight:600;">🔒 Admin Analytics</a></li>
           </ul>
         </div>
 
@@ -1003,81 +1002,10 @@ npx wrangler kv namespace create CACHE</div>
 
       <div class="footer-bottom">
         <span>© 2026 SparrowBase. Released under MIT License.</span>
-        <span>Built on Cloudflare Workers · Deployed at the edge · <a href="#admin" onclick="openAdminModal(event)" style="color:var(--text-tertiary);text-decoration:none;">Admin Login</a></span>
+        <span>Built on Cloudflare Workers · Deployed at the edge</span>
       </div>
     </div>
   </footer>
-
-  <!-- ═══════════ ADMIN ANALYTICS MODAL ═══════════ -->
-  <div id="adminModal" class="admin-modal-backdrop" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#0e1015;border:1px solid rgba(16,185,129,0.3);border-radius:16px;width:90%;max-width:760px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.8);color:#f1f5f9;padding:28px;position:relative;">
-      <button onclick="closeAdminModal()" style="position:absolute;top:18px;right:20px;background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;line-height:1;">✕</button>
-
-      <!-- 1. Login View -->
-      <div id="adminLoginView" style="text-align:center;padding:20px 10px;">
-        <div style="font-size:42px;margin-bottom:12px;">🔒</div>
-        <h3 style="margin:0 0 8px;font-size:22px;">SparrowBase Owner Analytics</h3>
-        <p style="color:#94a3b8;font-size:14px;margin:0 0 24px;">Enter your admin password to view live visitor traffic, click events, and analytics.</p>
-        <form onsubmit="handleAdminLogin(event)" style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
-          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password..." required style="background:#181b22;border:1px solid #27272a;border-radius:8px;padding:12px 16px;color:#fff;font-size:14px;outline:none;text-align:center;">
-          <button type="submit" style="background:#10b981;color:#000;border:none;border-radius:8px;padding:12px;font-weight:700;cursor:pointer;font-size:14px;">Unlock Dashboard →</button>
-          <div id="adminLoginError" style="color:#f43f5e;font-size:13px;display:none;">Incorrect password. Please try again.</div>
-        </form>
-      </div>
-
-      <!-- 2. Dashboard View -->
-      <div id="adminDashboardView" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #27272a;padding-bottom:16px;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-          <div>
-            <h3 style="margin:0;font-size:20px;display:flex;align-items:center;gap:8px;">
-              <span>🦜</span> Live Visitor Analytics
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>
-            </h3>
-            <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Real-time traffic for <code style="color:#10b981;">sparrowbase.pages.dev</code></p>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button onclick="renderAdminStats()" style="background:#181b22;border:1px solid #27272a;color:#f1f5f9;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;">🔄 Refresh</button>
-            <button onclick="logoutAdmin()" style="background:rgba(244,63,94,0.15);border:1px solid #f43f5e;color:#f43f5e;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600;">Lock</button>
-          </div>
-        </div>
-
-        <!-- Metrics Grid -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;">
-          <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:16px;text-align:center;">
-            <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;font-weight:600;">Total Views</div>
-            <div style="font-size:26px;font-weight:900;color:#10b981;margin-top:4px;" id="statTotalViews">0</div>
-          </div>
-          <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:16px;text-align:center;">
-            <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;font-weight:600;">Unique Visitors</div>
-            <div style="font-size:26px;font-weight:900;color:#3b82f6;margin-top:4px;" id="statUniqueVisitors">0</div>
-          </div>
-          <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:16px;text-align:center;">
-            <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;font-weight:600;">CLI Copies</div>
-            <div style="font-size:26px;font-weight:900;color:#f59e0b;margin-top:4px;" id="statCliCopies">0</div>
-          </div>
-          <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:16px;text-align:center;">
-            <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;font-weight:600;">Prompt Copies</div>
-            <div style="font-size:26px;font-weight:900;color:#8b5cf6;margin-top:4px;" id="statPromptCopies">0</div>
-          </div>
-          <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:16px;text-align:center;">
-            <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;font-weight:600;">GitHub Clicks</div>
-            <div style="font-size:26px;font-weight:900;color:#06b6d4;margin-top:4px;" id="statGithubClicks">0</div>
-          </div>
-        </div>
-
-        <!-- Recent Visits Log -->
-        <h4 style="margin:0 0 10px;font-size:14px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Live Visitor Activity Stream</h4>
-        <div style="background:#181b22;border:1px solid #27272a;border-radius:10px;padding:12px;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;" id="adminLogsStream">
-          <!-- Populated by JS -->
-        </div>
-
-        <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;">
-          <span>Zero-tracking cookies · 100% privacy-compliant</span>
-          <button onclick="clearAnalyticsData()" style="background:none;border:none;color:#64748b;text-decoration:underline;cursor:pointer;font-size:11px;">Reset Local Data</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast">Copied to clipboard!</div>
