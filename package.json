@@ -5,10 +5,18 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm --prefix packages/template-core run dev",
     "dev:template": "npm --prefix packages/template-core run dev",
     "dev:docs": "npm --prefix packages/docs-site run dev",
-    "build": "npm --prefix packages/cli run build && npm --prefix packages/template-core run build && npm --prefix packages/client run build",
-    "test": "npm --prefix packages/template-core run test && npm --prefix packages/client run test"
+    "dev:app": "npm --prefix sparrowbase-demo-app run dev",
+    "build": "npm --prefix packages/cli run build && npm --prefix packages/template-core run build && npm --prefix packages/client run build && npm --prefix packages/react run build",
+    "typecheck": "npm --prefix packages/cli run build && npm --prefix packages/template-core run build && npm --prefix packages/client run build && npm --prefix packages/react run build",
+    "test": "npm --prefix packages/template-core run test && npm --prefix packages/client run test && npm --prefix packages/react run test",
+    "studio": "node packages/cli/dist/index.js studio",
+    "mcp": "node packages/cli/dist/index.js mcp",
+    "lint": "npm run typecheck",
+    "db:generate": "npm --prefix packages/template-core run db:generate",
+    "db:migrate:local": "npm --prefix packages/template-core run db:migrate:local"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

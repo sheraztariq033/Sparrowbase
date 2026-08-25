@@ -772,6 +772,30 @@ section {
   font-weight: 600;
 }
 
+/* Prompt Library Tabs */
+.prompt-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prompt-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.prompt-tab.active {
+  background: var(--brand-blue);
+  color: #fff;
+  border-color: var(--brand-blue);
+}
+
 /* ═══════════════════════════════════════════
    COMPARISON TABLE
    ═══════════════════════════════════════════ */

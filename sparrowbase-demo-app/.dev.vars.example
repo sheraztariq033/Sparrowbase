@@ -1,0 +1,16 @@
+# =====================================================================
+# SparrowBase Demo App — Local Development Secrets (.dev.vars)
+# Copy this file to .dev.vars for local testing with `wrangler dev`
+# =====================================================================
+
+# 1. Better-Auth Session Encryption Secret (Minimum 32 random characters)
+BETTER_AUTH_SECRET="dev-demo-secret-super-secure-at-least-32-chars-long"
+
+# 2. Resend API Key (Optional)
+RESEND_API_KEY="re_mock_api_key_for_local_development"
+
+# 3. Stripe Secret Key (Optional)
+STRIPE_SECRET_KEY="sk_test_mock_stripe_secret_key"
+
+# 4. Stripe Webhook Signing Secret (Optional)
+STRIPE_WEBHOOK_SECRET="whsec_mock_stripe_webhook_secret"

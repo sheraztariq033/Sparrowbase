@@ -279,6 +279,61 @@ function setupSmoothAnchors() {
   });
 }
 
+// ── AI Prompt Library ──
+const PROMPTS = {
+  cursor: `# 🦜 SparrowBase .cursorrules
+You are building an edge-native app using SparrowBase on Cloudflare Workers.
+STRICT EDGE RUNTIME RULES:
+1. NEVER import Node.js built-ins ('fs', 'net', 'tls', 'child_process', 'express').
+2. Web Framework: Hono.js. Use c.req.json(), c.json(), and streamSSE().
+3. Database: D1 SQLite with Drizzle ORM (schema in src/db/schema.ts).
+4. Storage: Cloudflare R2 presigned streaming via @aws-sdk/s3-request-presigner.
+5. Auth: Better-Auth with Web Crypto (c.env.DB adapter).
+6. AI: Cloudflare Workers AI (c.env.AI.run('@cf/baai/bge-small-en-v1.5')) + Vectorize.
+7. Bot Protection: turnstileGuard() on public endpoints.`,
+
+  claude: `# 🦜 SparrowBase CLAUDE.md
+# Project: SparrowBase Edge Backend
+- Runtime: Cloudflare Workers (V8 isolates)
+- Framework: Hono.js
+- Primary DB: Cloudflare D1 (SQLite) + Drizzle ORM
+- Auth: Better-Auth + D1 Session Adapter
+- Object Storage: Cloudflare R2
+- AI & Vector: Workers AI + Vectorize
+- Testing: Vitest + @cloudflare/vitest-pool-workers
+CRITICAL CONSTRAINT: Do not write Express or Node fs code. Everything must run in Cloudflare Workers Edge runtime.`,
+
+  windsurf: `# 🦜 SparrowBase .windsurfrules
+Always target Cloudflare Workers edge environment.
+Use Hono for routes, Drizzle ORM with D1 SQLite for database, Better-Auth for session authentication, and Cloudflare Workers AI for vector embeddings and LLM streaming.
+Do not introduce Node.js process/fs/buffer dependencies.`,
+
+  frontend: `You are building a frontend that connects to a SparrowBase Cloudflare Edge Backend.
+Use '@sparrowbase/client' to interact with the backend:
+- Initialize client with createSparrowClient({ baseUrl })
+- Authenticate via client.auth.signIn / signUp
+- Upload files directly to Cloudflare R2 via client.uploadFile(file, userId)
+- Stream real-time AI responses via client.ai.streamChat({ messages, onChunk })
+- Perform vector similarity search with client.ai.search(query, topK)`
+};
+
+let activePromptKey = 'cursor';
+
+function switchPromptTab(key, btn) {
+  activePromptKey = key;
+  document.querySelectorAll('.prompt-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const display = document.getElementById('promptCodeDisplay');
+  if (display) {
+    display.textContent = PROMPTS[key] || '';
+  }
+}
+
+function copyActivePrompt() {
+  const text = PROMPTS[activePromptKey] || '';
+  copyText(text);
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   updateCalculator();
@@ -286,4 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRevealObserver();
   setupNavbarScroll();
   setupSmoothAnchors();
+  switchPromptTab('cursor', document.querySelector('.prompt-tab.active'));
 });
+

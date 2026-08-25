@@ -76,6 +76,24 @@ npm run test
 
 ---
 
+## 📦 Monorepo Workspace Structure
+
+| Package | Directory | Description |
+| :--- | :--- | :--- |
+| **`@sparrowbase/core`** | [`packages/template-core`](packages/template-core) | Core Edge Backend Platform & Starter Template (Hono + D1 + Better-Auth + R2 + AI) |
+| **`@sparrowbase/client`** | [`packages/client`](packages/client) | Universal TypeScript SDK Client for frontend apps (React, Next.js, Vue, Node) |
+| **`sparrowbase`** | [`packages/cli`](packages/cli) | Project Scaffolding CLI (`npx sparrowbase init`) |
+| **`@sparrowbase/docs-site`** | [`packages/docs-site`](packages/docs-site) | Documentation Portal & Landing Site ([sparrowbase.dev](https://sparrowbase.dev)) |
+| **`sparrowbase-demo-app`** | [`sparrowbase-demo-app`](sparrowbase-demo-app) | Reference & Standalone Test Demo Application |
+
+---
+
+## 👩‍💻 Contributing & Developer Guide
+
+Please see [**`CONTRIBUTING.md`**](CONTRIBUTING.md) for full setup instructions, edge runtime constraints, test execution, and pull request guidelines.
+
+---
+
 ## 🌐 Documentation & Community
 
 Visit **[sparrowbase.dev](https://sparrowbase.dev)** for full documentation, API references, and AI prompt guides.

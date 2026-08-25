@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import app from './index';
+import { sendEmail } from './email';
+import { sendSms } from './sms';
+import { chunkText } from './ai/chunker';
 
 describe('SparrowBase Production Platform API Suite', () => {
   // ── Public Route Tests ──
@@ -7,7 +10,7 @@ describe('SparrowBase Production Platform API Suite', () => {
   it('GET / should return SparrowBase Edge Platform info with security details', async () => {
     const res = await app.request('http://localhost/');
     expect(res.status).toBe(200);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.name).toBe('SparrowBase Production Edge Platform API');
     expect(data.domain).toBe('sparrowbase.dev');
     expect(data.status).toBe('running');
@@ -27,7 +30,7 @@ describe('SparrowBase Production Platform API Suite', () => {
 
     const res = await app.request('http://localhost/api/health', {}, mockEnv);
     expect(res.status).toBe(200);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.status).toBe('ok');
     expect(data.services.d1Database.status).toBe('healthy');
   });
@@ -60,9 +63,8 @@ describe('SparrowBase Production Platform API Suite', () => {
       mockEnv
     );
 
-    // Should be 401 Unauthorized (no session cookie/token)
     expect(res.status).toBe(401);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.error).toBe('Unauthorized');
   });
 
@@ -77,10 +79,23 @@ describe('SparrowBase Production Platform API Suite', () => {
       {}
     );
 
-    // Should be 401 Unauthorized (no session cookie/token)
     expect(res.status).toBe(401);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.error).toBe('Unauthorized');
+  });
+
+  it('POST /api/ai/ingest should REJECT unauthenticated requests', async () => {
+    const res = await app.request(
+      'http://localhost/api/ai/ingest',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: 'Long document text for RAG chunking...' }),
+      },
+      {}
+    );
+
+    expect(res.status).toBe(401);
   });
 
   it('POST /api/ai/search should REJECT unauthenticated requests', async () => {
@@ -97,6 +112,22 @@ describe('SparrowBase Production Platform API Suite', () => {
     expect(res.status).toBe(401);
   });
 
+  it('POST /api/ai/chat/stream should REJECT unauthenticated requests', async () => {
+    const res = await app.request(
+      'http://localhost/api/ai/chat/stream',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'Hello AI' }],
+        }),
+      },
+      {}
+    );
+
+    expect(res.status).toBe(401);
+  });
+
   // ── Stripe Webhook Tests (SECURITY) ──
 
   it('POST /api/stripe/webhook should require signature header', async () => {
@@ -104,7 +135,7 @@ describe('SparrowBase Production Platform API Suite', () => {
       method: 'POST',
     });
     expect(res.status).toBe(400);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.error).toContain('Stripe webhook signature or secret missing');
   });
 
@@ -134,9 +165,50 @@ describe('SparrowBase Production Platform API Suite', () => {
       mockEnv
     );
 
-    // Should be 403 Forbidden (invalid HMAC)
     expect(res.status).toBe(403);
-    const data = await res.json() as any;
+    const data = (await res.json()) as any;
     expect(data.error).toBe('Invalid webhook signature');
+  });
+
+  // ── Dual Email & SMS Engine Tests ──
+
+  it('sendEmail should default to Resend provider', async () => {
+    const result = await sendEmail(
+      { to: 'test@example.com', subject: 'Hello', html: '<p>Test</p>' },
+      {}
+    );
+    expect(result.success).toBe(true);
+    expect(result.provider).toBe('resend');
+    expect(result.simulated).toBe(true);
+  });
+
+  it('sendEmail should switch to Brevo when configured', async () => {
+    const result = await sendEmail(
+      { to: 'test@example.com', subject: 'Hello', html: '<p>Test</p>', provider: 'brevo' },
+      {}
+    );
+    expect(result.success).toBe(true);
+    expect(result.provider).toBe('brevo');
+    expect(result.simulated).toBe(true);
+  });
+
+  it('sendSms should support Twilio and Plivo simulation', async () => {
+    const twilioRes = await sendSms({ to: '+1234567890', message: 'OTP: 123456' }, {});
+    expect(twilioRes.success).toBe(true);
+    expect(twilioRes.provider).toBe('twilio');
+
+    const plivoRes = await sendSms(
+      { to: '+1234567890', message: 'OTP: 123456', provider: 'plivo' },
+      {}
+    );
+    expect(plivoRes.success).toBe(true);
+    expect(plivoRes.provider).toBe('plivo');
+  });
+
+  it('chunkText should divide long document into overlapping chunks', () => {
+    const longText = 'Sentence one. Sentence two. Sentence three. Sentence four. Sentence five.';
+    const chunks = chunkText(longText, { chunkSize: 30, overlap: 10 });
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks[0].text.length).toBeLessThanOrEqual(30);
   });
 });

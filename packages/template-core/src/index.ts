@@ -84,8 +84,10 @@ app.get('/', (c) => {
       '/api/stripe/webhook (🔒 HMAC verified)',
       '/api/ai/embed (🔒 auth required)',
       '/api/ai/search (🔒 auth required)',
+      '/api/ai/chat/stream (🔒 auth required)',
     ],
   });
 });
 
+export type AppType = typeof app;
 export default app;

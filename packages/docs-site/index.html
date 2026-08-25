@@ -27,6 +27,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="#features">Features</a></li>
         <li><a href="#ai-tools">AI Tools</a></li>
+        <li><a href="#prompt-library">AI Prompts</a></li>
         <li><a href="#comparison">Compare</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#docs">Docs</a></li>
@@ -391,6 +392,33 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
           <div class="tool-name">Replit Agent</div>
           <div class="tool-desc">Full in-browser IDE with AI agent deployment</div>
           <div class="tool-badge">✓ Compatible</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ AI PROMPT & RULES LIBRARY ═══════════ -->
+  <section id="prompt-library" class="tools-section" style="background: rgba(255,255,255,0.01);">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge">🎯 Vibe Coder Rules</span>
+        <h2 class="section-title">Curated AI Prompt & Rules Library</h2>
+        <p class="section-subtitle">Copy-paste these battle-tested rule sets into your AI tool to eliminate hallucinations and build zero-cost edge apps faster.</p>
+      </div>
+
+      <div class="prompt-library-card reveal" style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:24px; max-width:900px; margin:0 auto;">
+        <div class="prompt-tabs" style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+          <button class="prompt-tab active" onclick="switchPromptTab('cursor', this)">Cursor (.cursorrules)</button>
+          <button class="prompt-tab" onclick="switchPromptTab('claude', this)">Claude (CLAUDE.md)</button>
+          <button class="prompt-tab" onclick="switchPromptTab('windsurf', this)">Windsurf Rules</button>
+          <button class="prompt-tab" onclick="switchPromptTab('frontend', this)">v0 & Lovable Prompt</button>
+        </div>
+
+        <div class="prompt-content-wrapper" style="position:relative;">
+          <button class="btn btn-primary btn-sm" onclick="copyActivePrompt()" style="position:absolute; top:12px; right:12px; z-index:10;">
+            <span>📋</span> Copy Prompt
+          </button>
+          <pre id="promptCodeDisplay" style="background:var(--code-bg); padding:20px; border-radius:10px; font-size:13px; line-height:1.6; overflow-x:auto; color:#a6accd; max-height:350px;"></pre>
         </div>
       </div>
     </div>

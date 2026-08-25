@@ -1,22 +1,78 @@
-// ── SparrowBase Email Module (Edge-Native via Resend API) ──
-// Uses c.env.RESEND_API_KEY from Cloudflare Worker bindings (NOT process.env).
+// ── SparrowBase Email Module (Dual Provider: Resend [Default] + Brevo) ──
+// Supports Resend (3,000/mo free) and Brevo (300/day free) over Edge fetch().
 
 export interface EmailOptions {
   to: string | string[];
   subject: string;
   html: string;
   from?: string;
+  provider?: 'resend' | 'brevo';
+}
+
+export interface EmailEnv {
+  RESEND_API_KEY?: string;
+  BREVO_API_KEY?: string;
+  EMAIL_PROVIDER?: 'resend' | 'brevo';
 }
 
 /**
- * Send an email via the Resend API.
- * @param options - Email options (to, subject, html, from)
- * @param resendApiKey - The Resend API key from c.env.RESEND_API_KEY
+ * Send an email via Resend or Brevo. Defaults to Resend.
+ * @param options - Email options (to, subject, html, from, provider)
+ * @param env - Cloudflare Worker environment bindings
  */
-export async function sendEmail(options: EmailOptions, resendApiKey?: string): Promise<{ success: boolean; simulated?: boolean; data?: any }> {
+export async function sendEmail(
+  options: EmailOptions,
+  env?: EmailEnv | string
+): Promise<{ success: boolean; simulated?: boolean; provider: string; data?: any }> {
+  // Support passing either the full env object or just the Resend API key string (backward compatibility)
+  const envObj: EmailEnv = typeof env === 'string' ? { RESEND_API_KEY: env } : env || {};
+  const provider = options.provider || envObj.EMAIL_PROVIDER || 'resend';
+
+  const toList = Array.isArray(options.to) ? options.to : [options.to];
+  const fromAddress = options.from || 'SparrowBase <noreply@sparrowbase.dev>';
+
+  // 1. ── BREVO PROVIDER (300 emails/day free) ──
+  if (provider === 'brevo') {
+    const brevoApiKey = envObj.BREVO_API_KEY;
+    if (!brevoApiKey) {
+      console.warn(`[SparrowBase Email] BREVO_API_KEY not set. Simulating Brevo email to ${options.to}: "${options.subject}"`);
+      return { success: true, simulated: true, provider: 'brevo' };
+    }
+
+    // Parse sender name and email
+    const senderMatch = fromAddress.match(/^(.*?)\s*<(.+?)>$/) || [null, 'SparrowBase', fromAddress];
+    const senderName = senderMatch[1] || 'SparrowBase';
+    const senderEmail = senderMatch[2] || fromAddress;
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': brevoApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: senderName, email: senderEmail },
+        to: toList.map((email) => ({ email })),
+        subject: options.subject,
+        htmlContent: options.html,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[SparrowBase Email] Brevo API Error (${response.status}): ${errorText}`);
+      throw new Error(`Brevo API Error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    return { success: true, provider: 'brevo', data };
+  }
+
+  // 2. ── RESEND PROVIDER [DEFAULT] (3,000 emails/month free) ──
+  const resendApiKey = envObj.RESEND_API_KEY;
   if (!resendApiKey) {
-    console.warn(`[SparrowBase Email] RESEND_API_KEY not set. Simulating email to ${options.to}: "${options.subject}"`);
-    return { success: true, simulated: true };
+    console.warn(`[SparrowBase Email] RESEND_API_KEY not set. Simulating Resend email to ${options.to}: "${options.subject}"`);
+    return { success: true, simulated: true, provider: 'resend' };
   }
 
   const response = await fetch('https://api.resend.com/emails', {
@@ -26,8 +82,8 @@ export async function sendEmail(options: EmailOptions, resendApiKey?: string): P
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: options.from || 'SparrowBase <noreply@sparrowbase.dev>',
-      to: Array.isArray(options.to) ? options.to : [options.to],
+      from: fromAddress,
+      to: toList,
       subject: options.subject,
       html: options.html,
     }),
@@ -40,7 +96,7 @@ export async function sendEmail(options: EmailOptions, resendApiKey?: string): P
   }
 
   const data = await response.json();
-  return { success: true, data };
+  return { success: true, provider: 'resend', data };
 }
 
 // ── Pre-built Email Templates ──
@@ -128,7 +184,7 @@ export function subscriptionCanceledEmailHtml(): string {
       Your Pro subscription has been canceled. Your account has been moved back to the free tier.
     </p>
     <p style="color:#a3a3a3;font-size:14px;line-height:1.6;margin:0 0 24px;">
-      You can still use SparrowBase with Cloudflare's generous free tier (100k requests/day, 5M D1 reads/day). If you'd like to re-subscribe at any time, visit your billing page.
+      You can still use SparrowBase with Cloudflare's generous free tier. If you'd like to re-subscribe at any time, visit your billing page.
     </p>
   `);
 }
@@ -137,14 +193,7 @@ export function subscriptionCanceledEmailHtml(): string {
 export function welcomeToProEmailHtml(): string {
   return wrapTemplate('Welcome to Pro! 🎉', `
     <p style="color:#a3a3a3;font-size:14px;line-height:1.6;margin:0 0 16px;">
-      Your Pro subscription is now active. You've unlocked:
+      Your Pro subscription is now active. You've unlocked higher limits, premium templates, and advanced AI rules.
     </p>
-    <ul style="color:#a3a3a3;font-size:14px;line-height:1.8;padding-left:20px;margin:0 0 24px;">
-      <li>10M+ requests/month on Cloudflare Workers</li>
-      <li>Premium SaaS templates & admin panels</li>
-      <li>Priority support & architecture review</li>
-      <li>Advanced AI rules packs</li>
-    </ul>
-    <p style="color:#a3a3a3;font-size:14px;">Thank you for supporting SparrowBase!</p>
   `);
 }
