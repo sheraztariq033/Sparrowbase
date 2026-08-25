@@ -5,6 +5,26 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "license": "MIT",
+  "author": "SparrowBase Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sheraztariq033/Sparrowbase.git",
+    "directory": "packages/client"
+  },
+  "homepage": "https://sparrowbase.dev",
+  "keywords": [
+    "sparrowbase",
+    "cloudflare-workers",
+    "edge-backend",
+    "sdk",
+    "typescript",
+    "better-auth",
+    "vectorize"
+  ],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run"

@@ -6,6 +6,26 @@
   "bin": {
     "sparrowbase": "bin/sparrowbase.js"
   },
+  "license": "MIT",
+  "author": "SparrowBase Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sheraztariq033/Sparrowbase.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://sparrowbase.dev",
+  "keywords": [
+    "sparrowbase",
+    "cli",
+    "cloudflare-workers",
+    "scaffolder",
+    "mcp",
+    "studio"
+  ],
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node bin/sparrowbase.js"

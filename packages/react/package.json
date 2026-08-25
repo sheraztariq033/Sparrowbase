@@ -3,8 +3,28 @@
   "version": "1.0.0",
   "description": "React & Next.js UI hooks and context provider for SparrowBase",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
+  "license": "MIT",
+  "author": "SparrowBase Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sheraztariq033/Sparrowbase.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://sparrowbase.dev",
+  "keywords": [
+    "sparrowbase",
+    "react",
+    "nextjs",
+    "hooks",
+    "cloudflare-workers",
+    "better-auth",
+    "realtime"
+  ],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run"
