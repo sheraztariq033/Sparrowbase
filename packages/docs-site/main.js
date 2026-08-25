@@ -30,10 +30,15 @@ export function switchTab(tabId) {
   });
 }
 
-// ── Copy Helpers ──
+// ── Copy Helpers & Telemetry ──
 export function copyText(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied to clipboard!');
+      if (text.includes('sparrowbase init')) {
+        trackVisitorEvent('cli_copy', { command: text });
+      }
+    });
   } else {
     showToast('Copied!');
   }
@@ -257,7 +262,7 @@ function setupSmoothAnchors() {
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', (e) => {
       const href = a.getAttribute('href');
-      if (href === '#') return;
+      if (href === '#' || href === '#admin') return;
       const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
@@ -403,11 +408,194 @@ export function copyGeneratedPrompt() {
   const btn = document.getElementById('copyPromptBtn');
   if (promptOutputEl) {
     copyText(promptOutputEl.textContent.trim());
+    trackVisitorEvent('prompt_copy', { slug: document.getElementById('ideaAppName')?.textContent || 'custom' });
     if (btn) {
       const original = btn.textContent;
       btn.textContent = '✅ Copied!';
       setTimeout(() => { btn.textContent = original; }, 2000);
     }
+  }
+}
+
+// ═══════════════════════════════════════════
+// ── VISITOR TRACKING & ADMIN ANALYTICS ──
+// ═══════════════════════════════════════════
+
+const ADMIN_PASSWORD = 'sparrow2026!';
+const STORAGE_KEY = 'sparrow_analytics_store_v1';
+
+function getAnalyticsStore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {
+    views: 12, // Baseline seeds for demo
+    uniqueVisitors: ['vis_init_1', 'vis_init_2', 'vis_init_3', 'vis_init_4', 'vis_init_5'],
+    cliCopies: 4,
+    promptCopies: 3,
+    githubClicks: 2,
+    logs: [
+      { type: 'page_view', path: '/', referrer: 'Direct', device: 'Desktop', time: '14:20:00' },
+      { type: 'cli_copy', command: 'npx sparrowbase init', device: 'Desktop', time: '14:21:15' },
+      { type: 'prompt_copy', slug: 'ai-pdf', device: 'Mobile', time: '14:22:40' },
+      { type: 'github_click', device: 'Desktop', time: '14:25:10' }
+    ]
+  };
+}
+
+function saveAnalyticsStore(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+export function trackVisitorEvent(type, details = {}) {
+  const data = getAnalyticsStore();
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const device = isMobile ? 'Mobile' : 'Desktop';
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0];
+
+  // 1. Unique visitor identification (daily hash)
+  const visitorKey = 'vis_' + now.toISOString().slice(0, 10) + '_' + (navigator.language || 'en');
+  if (!data.uniqueVisitors.includes(visitorKey)) {
+    data.uniqueVisitors.push(visitorKey);
+  }
+
+  // 2. Increment counters
+  if (type === 'page_view') {
+    data.views = (data.views || 0) + 1;
+  } else if (type === 'cli_copy') {
+    data.cliCopies = (data.cliCopies || 0) + 1;
+  } else if (type === 'prompt_copy') {
+    data.promptCopies = (data.promptCopies || 0) + 1;
+  } else if (type === 'github_click') {
+    data.githubClicks = (data.githubClicks || 0) + 1;
+  }
+
+  // 3. Log event
+  data.logs.unshift({
+    type,
+    device,
+    time: timeStr,
+    path: window.location.pathname + window.location.hash,
+    referrer: document.referrer ? new URL(document.referrer).hostname : 'Direct',
+    ...details
+  });
+
+  // Keep last 40 logs
+  if (data.logs.length > 40) data.logs = data.logs.slice(0, 40);
+
+  saveAnalyticsStore(data);
+}
+
+// ── Admin Modal Operations ──
+export function openAdminModal(event) {
+  if (event) event.preventDefault();
+  const modal = document.getElementById('adminModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+
+  const isLoggedIn = sessionStorage.getItem('sparrow_admin_logged_in') === 'true';
+  const loginView = document.getElementById('adminLoginView');
+  const dashboardView = document.getElementById('adminDashboardView');
+
+  if (isLoggedIn) {
+    if (loginView) loginView.style.display = 'none';
+    if (dashboardView) dashboardView.style.display = 'block';
+    renderAdminStats();
+  } else {
+    if (loginView) loginView.style.display = 'block';
+    if (dashboardView) dashboardView.style.display = 'none';
+    const pwd = document.getElementById('adminPasswordInput');
+    if (pwd) { pwd.value = ''; pwd.focus(); }
+  }
+}
+
+export function closeAdminModal() {
+  const modal = document.getElementById('adminModal');
+  if (modal) modal.style.display = 'none';
+  if (window.location.hash === '#admin') {
+    history.replaceState(null, null, ' ');
+  }
+}
+
+export function handleAdminLogin(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById('adminPasswordInput');
+  const errorEl = document.getElementById('adminLoginError');
+  if (!input) return;
+
+  if (input.value.trim() === ADMIN_PASSWORD) {
+    sessionStorage.setItem('sparrow_admin_logged_in', 'true');
+    if (errorEl) errorEl.style.display = 'none';
+    document.getElementById('adminLoginView').style.display = 'none';
+    document.getElementById('adminDashboardView').style.display = 'block';
+    renderAdminStats();
+  } else {
+    if (errorEl) errorEl.style.display = 'block';
+  }
+}
+
+export function logoutAdmin() {
+  sessionStorage.removeItem('sparrow_admin_logged_in');
+  document.getElementById('adminLoginView').style.display = 'block';
+  document.getElementById('adminDashboardView').style.display = 'none';
+}
+
+export function renderAdminStats() {
+  const data = getAnalyticsStore();
+  const elViews = document.getElementById('statTotalViews');
+  const elUnique = document.getElementById('statUniqueVisitors');
+  const elCli = document.getElementById('statCliCopies');
+  const elPrompt = document.getElementById('statPromptCopies');
+  const elGithub = document.getElementById('statGithubClicks');
+  const logsStream = document.getElementById('adminLogsStream');
+
+  if (elViews) elViews.textContent = data.views.toLocaleString();
+  if (elUnique) elUnique.textContent = data.uniqueVisitors.length.toLocaleString();
+  if (elCli) elCli.textContent = data.cliCopies.toLocaleString();
+  if (elPrompt) elPrompt.textContent = data.promptCopies.toLocaleString();
+  if (elGithub) elGithub.textContent = data.githubClicks.toLocaleString();
+
+  if (logsStream) {
+    logsStream.innerHTML = data.logs.map(log => {
+      let icon = '👁️';
+      let title = 'Page View';
+      let color = '#3b82f6';
+
+      if (log.type === 'cli_copy') {
+        icon = '⚡';
+        title = 'CLI Scaffolding Copy';
+        color = '#f59e0b';
+      } else if (log.type === 'prompt_copy') {
+        icon = '🪄';
+        title = 'App Builder Copy';
+        color = '#8b5cf6';
+      } else if (log.type === 'github_click') {
+        icon = '⭐';
+        title = 'GitHub Repo Click';
+        color = '#06b6d4';
+      }
+
+      return `
+        <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <div>
+            <span style="color: ${color}; font-weight: 700;">${icon} ${title}</span>
+            <span style="color: #94a3b8; font-size: 11px; margin-left: 6px;">(${log.device} · ${log.referrer || 'Direct'})</span>
+          </div>
+          <span style="color: #64748b; font-size: 11px;">${log.time}</span>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+export function clearAnalyticsData() {
+  if (confirm('Reset visitor traffic analytics counters to zero?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderAdminStats();
   }
 }
 
@@ -426,6 +614,12 @@ if (typeof window !== 'undefined') {
   window.applyIdeaPreset = applyIdeaPreset;
   window.generateIdeaBlueprint = generateIdeaBlueprint;
   window.copyGeneratedPrompt = copyGeneratedPrompt;
+  window.openAdminModal = openAdminModal;
+  window.closeAdminModal = closeAdminModal;
+  window.handleAdminLogin = handleAdminLogin;
+  window.logoutAdmin = logoutAdmin;
+  window.renderAdminStats = renderAdminStats;
+  window.clearAnalyticsData = clearAnalyticsData;
 }
 
 // ── Bind event listeners directly on DOM Ready ──
@@ -437,6 +631,29 @@ function init() {
   setupSmoothAnchors();
   switchPromptTab('cursor', document.querySelector('.prompt-tab.active'));
   generateIdeaBlueprint();
+
+  // Track initial page view
+  trackVisitorEvent('page_view');
+
+  // Track GitHub button clicks
+  const githubBtn = document.getElementById('githubBtn');
+  if (githubBtn) {
+    githubBtn.addEventListener('click', () => trackVisitorEvent('github_click'));
+  }
+
+  // Check URL hash for admin access (e.g. #admin or /?admin)
+  if (window.location.hash === '#admin' || window.location.search.includes('admin')) {
+    openAdminModal();
+  }
+
+  // Listen for Escape key to close modal
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAdminModal();
+    // Secret shortcut Ctrl + Shift + A to open Admin
+    if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+      openAdminModal();
+    }
+  });
 
   document.querySelectorAll('.code-tab').forEach(tab => {
     tab.addEventListener('click', () => {
