@@ -421,8 +421,8 @@ export function copyGeneratedPrompt() {
 // ── VISITOR TRACKING & ADMIN ANALYTICS ──
 // ═══════════════════════════════════════════
 
-const ADMIN_PASSWORD = 'sparrow2026!';
-const STORAGE_KEY = 'sparrow_analytics_store_v1';
+const ADMIN_PASSWORD = 'Test@1234';
+const STORAGE_KEY = 'sparrow_analytics_real_v2';
 
 function getAnalyticsStore() {
   try {
@@ -430,17 +430,12 @@ function getAnalyticsStore() {
     if (raw) return JSON.parse(raw);
   } catch {}
   return {
-    views: 12, // Baseline seeds for demo
-    uniqueVisitors: ['vis_init_1', 'vis_init_2', 'vis_init_3', 'vis_init_4', 'vis_init_5'],
-    cliCopies: 4,
-    promptCopies: 3,
-    githubClicks: 2,
-    logs: [
-      { type: 'page_view', path: '/', referrer: 'Direct', device: 'Desktop', time: '14:20:00' },
-      { type: 'cli_copy', command: 'npx sparrowbase init', device: 'Desktop', time: '14:21:15' },
-      { type: 'prompt_copy', slug: 'ai-pdf', device: 'Mobile', time: '14:22:40' },
-      { type: 'github_click', device: 'Desktop', time: '14:25:10' }
-    ]
+    views: 0,
+    uniqueVisitors: [],
+    cliCopies: 0,
+    promptCopies: 0,
+    githubClicks: 0,
+    logs: []
   };
 }
 
