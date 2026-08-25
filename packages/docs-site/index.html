@@ -109,6 +109,8 @@
           <div class="code-tabs">
             <button class="code-tab active" onclick="switchTab('tab-quickstart')">Quick Start</button>
             <button class="code-tab" onclick="switchTab('tab-ai-rules')">AI Rules Engine</button>
+            <button class="code-tab" onclick="switchTab('tab-mcp')">Cloudflare MCP</button>
+            <button class="code-tab" onclick="switchTab('tab-react')">React & Realtime</button>
             <button class="code-tab" onclick="switchTab('tab-client-sdk')">Client SDK</button>
             <button class="code-tab" onclick="switchTab('tab-api-server')">API Server</button>
             <button class="code-tab" onclick="switchTab('tab-schema')">Database Schema</button>
@@ -125,18 +127,16 @@
 <span class="hl-cmt"># 2. Install dependencies</span>
 <span class="hl-var">$</span> cd my-saas-app && npm install
 
-<span class="hl-cmt"># 3. Provision free Cloudflare resources</span>
-<span class="hl-var">$</span> npx wrangler d1 create sparrowbase-db
-<span class="hl-var">$</span> npx wrangler r2 bucket create uploads
-<span class="hl-var">$</span> npx wrangler kv namespace create CACHE
+<span class="hl-cmt"># 3. 1-Click Provision Cloudflare $0 Resources</span>
+<span class="hl-var">$</span> npx sparrowbase provision
 
-<span class="hl-cmt"># 4. Run local development server (Miniflare)</span>
+<span class="hl-cmt"># 4. Open Visual Local Studio</span>
+<span class="hl-var">$</span> npx sparrowbase studio
+<span class="hl-cmt"># → Dashboard running at http://localhost:4983</span>
+
+<span class="hl-cmt"># 5. Run local development server (Miniflare)</span>
 <span class="hl-var">$</span> npm run dev
-<span class="hl-cmt"># → Server running at http://localhost:8787</span>
-
-<span class="hl-cmt"># 5. Deploy to Cloudflare Edge (330+ locations)</span>
-<span class="hl-var">$</span> npx wrangler deploy
-<span class="hl-cmt"># → Published to https://my-saas-app.workers.dev</span></div>
+<span class="hl-cmt"># → Server running at http://localhost:8787</span></div>
 
           <!-- AI Rules Engine -->
           <div class="code-panel" id="tab-ai-rules"><span class="hl-cmt">// .sparrowbase/CLAUDE.md — Auto-loaded by AI coding agents</span>
@@ -156,7 +156,43 @@
 - <span class="hl-type">CACHE</span>    → KV key-value store (rate limiting)
 - <span class="hl-type">UPLOADS</span>  → R2 object storage (file uploads)
 - <span class="hl-type">AI</span>       → Workers AI (embeddings, inference)
-- <span class="hl-type">VECTORIZE</span>→ Vector index (RAG search)</div>
+- <span class="hl-type">VECTORIZE</span>→ Vector index (RAG search)
+- <span class="hl-type">REALTIME_ROOM</span> → Durable Objects (WebSockets)</div>
+
+          <!-- Cloudflare MCP -->
+          <div class="code-panel" id="tab-mcp"><span class="hl-cmt">// Official Cloudflare MCP Servers (developers.cloudflare.com/agent-setup/prompt.md)</span>
+<span class="hl-cmt">// Auto-configured in .cursor/mcp.json and .vscode/mcp.json:</span>
+{
+  <span class="hl-str">"mcpServers"</span>: {
+    <span class="hl-str">"cloudflare"</span>: { <span class="hl-str">"url"</span>: <span class="hl-str">"https://mcp.cloudflare.com/mcp"</span> },
+    <span class="hl-str">"cloudflare-docs"</span>: { <span class="hl-str">"url"</span>: <span class="hl-str">"https://docs.mcp.cloudflare.com/mcp"</span> },
+    <span class="hl-str">"cloudflare-bindings"</span>: { <span class="hl-str">"url"</span>: <span class="hl-str">"https://bindings.mcp.cloudflare.com/mcp"</span> },
+    <span class="hl-str">"cloudflare-builds"</span>: { <span class="hl-str">"url"</span>: <span class="hl-str">"https://builds.mcp.cloudflare.com/mcp"</span> },
+    <span class="hl-str">"cloudflare-observability"</span>: { <span class="hl-str">"url"</span>: <span class="hl-str">"https://observability.mcp.cloudflare.com/mcp"</span> }
+  }
+}
+
+<span class="hl-cmt"># Or start the local SparrowBase MCP server:</span>
+<span class="hl-var">$</span> npx sparrowbase mcp</div>
+
+          <!-- React & Realtime -->
+          <div class="code-panel" id="tab-react"><span class="hl-kw">import</span> { useSession, useFileUpload, useAIChat, useRealtimeChannel } <span class="hl-kw">from</span> <span class="hl-str">'@sparrowbase/react'</span>;
+
+<span class="hl-kw">export function</span> <span class="hl-fn">Dashboard</span>() {
+  <span class="hl-cmt">// 1. Better-Auth session</span>
+  <span class="hl-kw">const</span> { user, signOut } = <span class="hl-fn">useSession</span>();
+
+  <span class="hl-cmt">// 2. Direct streaming R2 file upload</span>
+  <span class="hl-kw">const</span> { upload, isUploading } = <span class="hl-fn">useFileUpload</span>();
+
+  <span class="hl-cmt">// 3. Real-time Workers AI token streaming</span>
+  <span class="hl-kw">const</span> { messages, input, setInput, sendMessage } = <span class="hl-fn">useAIChat</span>();
+
+  <span class="hl-cmt">// 4. Durable Object multiplayer room</span>
+  <span class="hl-kw">const</span> { isConnected, peers, sendMessage: broadcast } = <span class="hl-fn">useRealtimeChannel</span>(<span class="hl-str">'general'</span>);
+
+  <span class="hl-kw">return</span> &lt;<span class="hl-type">div</span>&gt;Connected: {peers.length} peers online&lt;/<span class="hl-type">div</span>&gt;;
+}</div>
 
           <!-- Client SDK -->
           <div class="code-panel" id="tab-client-sdk"><span class="hl-kw">import</span> { createSparrowClient } <span class="hl-kw">from</span> <span class="hl-str">'@sparrowbase/client'</span>;
@@ -308,6 +344,42 @@ app.<span class="hl-fn">get</span>(<span class="hl-str">'/api/users'</span>, aut
             <div class="feature-title">Stripe Billing (Webhook-Ready)</div>
             <div class="feature-desc">Pre-configured Stripe webhook handler that validates signatures using <code>ArrayBuffer</code> (not <code>JSON.parse</code>, which breaks Stripe's HMAC). Handles <code>checkout.session.completed</code>, <code>invoice.paid</code>, <code>customer.subscription.deleted</code>, and <code>customer.subscription.updated</code> events. Includes subscription status tracking in D1 and multi-tenant org billing.</div>
             <div class="feature-code">const sig = c.req.header('stripe-signature'); // ArrayBuffer body verification</div>
+          </div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-cyan">⚡</div>
+            <div class="feature-title">Realtime (Durable Objects)</div>
+            <div class="feature-desc">Live multiplayer collaboration, chat rooms, and peer presence powered by Cloudflare Durable Objects and WebSockets. Seamlessly connect frontends with <code>useRealtimeChannel()</code>.</div>
+            <div class="feature-code">useRealtimeChannel('room_id', user)</div>
+          </div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-emerald">✉️</div>
+            <div class="feature-title">Dual Email Engine</div>
+            <div class="feature-desc">Built-in transactional email with Resend as default (3,000/mo free, &lt;2s delivery) and Brevo support (300/day free). Switch providers with a single environment variable.</div>
+            <div class="feature-code">sendEmail({ to, subject, html })</div>
+          </div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-amber">📱</div>
+            <div class="feature-title">SMS & Phone OTP</div>
+            <div class="feature-desc">Edge-native SMS dispatch with Twilio and Plivo adapters. Protected by Cloudflare Turnstile bot detection and KV rate limiting to prevent SMS toll fraud.</div>
+            <div class="feature-code">sendSms({ to: '+1...', message: 'OTP: 123456' })</div>
+          </div>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-card-content">
+            <div class="feature-icon feature-icon-violet">🔌</div>
+            <div class="feature-title">Cloudflare MCP & Studio</div>
+            <div class="feature-desc">Official Cloudflare MCP servers for Cursor & Claude Desktop, plus local Visual Studio dashboard (<code>npx sparrowbase studio</code>) to inspect D1 tables and test vector search.</div>
+            <div class="feature-code">npx sparrowbase studio · npx sparrowbase mcp</div>
           </div>
         </div>
       </div>

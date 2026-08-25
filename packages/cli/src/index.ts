@@ -118,6 +118,25 @@ program
         fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2));
       }
 
+      // Ensure official Cloudflare MCP configs exist in the scaffolded project
+      const mcpContent = JSON.stringify({
+        mcpServers: {
+          cloudflare: { url: "https://mcp.cloudflare.com/mcp" },
+          "cloudflare-docs": { url: "https://docs.mcp.cloudflare.com/mcp" },
+          "cloudflare-bindings": { url: "https://bindings.mcp.cloudflare.com/mcp" },
+          "cloudflare-builds": { url: "https://builds.mcp.cloudflare.com/mcp" },
+          "cloudflare-observability": { url: "https://observability.mcp.cloudflare.com/mcp" }
+        }
+      }, null, 2);
+
+      const cursorDir = path.join(targetDir, '.cursor');
+      if (!fs.existsSync(cursorDir)) fs.mkdirSync(cursorDir, { recursive: true });
+      fs.writeFileSync(path.join(cursorDir, 'mcp.json'), mcpContent);
+
+      const vscodeDir = path.join(targetDir, '.vscode');
+      if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir, { recursive: true });
+      fs.writeFileSync(path.join(vscodeDir, 'mcp.json'), mcpContent);
+
       console.log('\n\x1b[32m✔ SparrowBase project initialized successfully!\x1b[0m');
       console.log('\nNext steps:');
       console.log(`  1. cd ${projectName}`);
